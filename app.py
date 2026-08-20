@@ -151,16 +151,18 @@ st.sidebar.info(
     • ADX
     • الدعم والمقاومة
     • Fibonacci
+    • Fibonacci Extensions
     • Breakout
     • Pullback
     • Trend Slope
     • Trend Alignment
     • Entry Engine
     • Risk Engine
+    • Professional Target Engine
     • التقييم النهائي
     • الدخول
     • وقف الخسارة
-    • 3 أهداف
+    • 4 أهداف
     """
 )
 
@@ -832,6 +834,50 @@ def add_indicators(df):
     )
 
     # =====================================================
+    # Fibonacci Extensions - أهداف ممتدة
+    # =====================================================
+
+    df["fib_ext_1272"] = (
+        swing_low +
+        fib_range * 1.272
+    )
+
+    df["fib_ext_1618"] = (
+        swing_low +
+        fib_range * 1.618
+    )
+
+    df["fib_ext_2000"] = (
+        swing_low +
+        fib_range * 2.000
+    )
+
+    # =====================================================
+    # Previous Support / Resistance
+    # مهم: لا نعتمد على الشمعة الحالية
+    # =====================================================
+
+    df["previous_support"] = (
+        low
+        .rolling(
+            20,
+            min_periods=10
+        )
+        .min()
+        .shift(1)
+    )
+
+    df["previous_resistance"] = (
+        high
+        .rolling(
+            20,
+            min_periods=10
+        )
+        .max()
+        .shift(1)
+    )
+
+    # =====================================================
     # Trend Slope
     # =====================================================
 
@@ -1128,201 +1174,803 @@ def determine_entry(
 
 
 # =========================================================
-# 🛡️ RISK ENGINE
+# 🛡️ PROFESSIONAL RISK & TARGET ENGINE
 # =========================================================
-
-def build_target_engine(df_d, entry, atr_val):
-    """اختيار 3 أو 4 أهداف بعيدة من مستويات سعرية حقيقية، مع ترتيب إجباري."""
-    last = df_d.iloc[-1]
-
-    if not np.isfinite(atr_val) or atr_val <= 0:
-        atr_val = entry * 0.03
-
-    candidates = []
-
-    def add_candidate(price, source, strength=1.0):
-        try:
-            price = float(price)
-        except Exception:
-            return
-        if not np.isfinite(price) or price <= entry:
-            return
-        # الأهداف القريبة جدًا لا تدخل كأهداف بعيدة.
-        if price < entry + atr_val * 2.0:
-            return
-        candidates.append({"price": price, "source": source, "strength": float(strength)})
-
-    # مقاومات تاريخية من نوافذ متعددة
-    for window, strength in [(20, 1.0), (50, 1.15), (100, 1.30), (200, 1.45)]:
-        if len(df_d) >= min(window, 20):
-            add_candidate(df_d["High"].rolling(window, min_periods=min(window, 20)).max().iloc[-1],
-                          f"مقاومة {window} يوم", strength)
-
-    # Swing Highs محلية: مستويات تاريخية حقيقية وليست مجرد ATR
-    highs = df_d["High"].rolling(5, center=True).max()
-    local_highs = df_d.loc[(df_d["High"] >= highs) & (df_d["High"] > entry), "High"]
-    if not local_highs.empty:
-        for price in local_highs.tail(30):
-            add_candidate(price, "Swing High", 1.20)
-
-    # مستويات Fibonacci Extensions من آخر swing range
-    swing_high = float(df_d["High"].rolling(60, min_periods=20).max().iloc[-1])
-    swing_low = float(df_d["Low"].rolling(60, min_periods=20).min().iloc[-1])
-    fib_range = swing_high - swing_low
-    if np.isfinite(fib_range) and fib_range > 0:
-        for level, strength in [(1.272, 1.15), (1.618, 1.30), (2.0, 1.35), (2.272, 1.25), (2.618, 1.20)]:
-            add_candidate(swing_low + fib_range * level, f"Fibonacci {level}", strength)
-
-    # قمم تاريخية مباشرة
-    for window, strength in [(252, 1.35), (504, 1.45), (756, 1.50)]:
-        if len(df_d) >= 60:
-            w = min(window, len(df_d))
-            add_candidate(df_d["High"].tail(w).max(), f"قمة تاريخية {w} جلسة", strength)
-
-    # إزالة المستويات المتقاربة جدًا ودمجها
-    candidates.sort(key=lambda x: x["price"])
-    clustered = []
-    tolerance = max(atr_val * 0.35, entry * 0.015)
-    for c in candidates:
-        if not clustered or abs(c["price"] - clustered[-1]["price"]) > tolerance:
-            clustered.append(c)
-        elif c["strength"] > clustered[-1]["strength"]:
-            clustered[-1] = c
-
-    # اختيار أهداف بعيدة ومتدرجة. لا نسمح بأي هدف أن يتراجع عن السابق.
-    selected = []
-    min_gap = max(atr_val * 0.65, entry * 0.04)
-    for c in clustered:
-        if not selected or c["price"] >= selected[-1]["price"] + min_gap:
-            selected.append(c)
-
-    # نفضل 4 مستويات إن كانت موجودة، وإلا 3 فقط.
-    if len(selected) >= 4:
-        chosen = selected[:4]
-    elif len(selected) >= 3:
-        chosen = selected[:3]
-    else:
-        # fallback بعيد ومنطقي، مع ضمان الترتيب وعدم تساوي الأهداف
-        base = entry
-        chosen = [
-            {"price": base + atr_val * 2.5, "source": "ATR fallback 2.5", "strength": 0.5},
-            {"price": base + atr_val * 4.0, "source": "ATR fallback 4.0", "strength": 0.5},
-            {"price": base + atr_val * 5.5, "source": "ATR fallback 5.5", "strength": 0.5},
-        ]
-        if len(selected) == 3:
-            chosen = selected
-        elif len(selected) == 2:
-            chosen = selected + [{"price": max(selected[-1]["price"] + min_gap, base + atr_val * 5.5), "source": "ATR fallback", "strength": 0.5}]
-        elif len(selected) == 1:
-            p = selected[0]["price"]
-            chosen = [selected[0], {"price": max(p + min_gap, base + atr_val * 4.0), "source": "ATR fallback", "strength": 0.5}, {"price": max(p + min_gap * 2, base + atr_val * 5.5), "source": "ATR fallback", "strength": 0.5}]
-
-    prices = [float(x["price"]) for x in chosen]
-    prices = sorted(prices)
-    # ضمان صارم: Entry < TP1 < TP2 < TP3 < TP4
-    fixed = []
-    for p in prices:
-        if not fixed:
-            fixed.append(max(p, entry + atr_val * 2.0))
-        else:
-            fixed.append(max(p, fixed[-1] + min_gap))
-    fixed = fixed[:4]
-
-    result = []
-    for i, price in enumerate(fixed, 1):
-        result.append({
-            "price": float(price),
-            "profit_pct": float((price - entry) / entry * 100),
-            "source": chosen[i-1]["source"] if i-1 < len(chosen) else "Target Engine"
-        })
-    return result
-
 
 def calculate_risk_engine(
     df_d,
     entry,
     capital,
-    risk_percent
+    risk_percent,
+    df_w=None,
+    df_m=None
 ):
-    last = df_d.iloc[-1]
-    support = float(last["support"])
-    resistance = float(last["resistance"])
-    atr_val = float(last["atr"])
 
-    if not np.isfinite(atr_val) or atr_val <= 0:
+    last = df_d.iloc[-1]
+
+    # =====================================================
+    # البيانات الأساسية
+    # =====================================================
+
+    support = float(
+        last["support"]
+    )
+
+    resistance = float(
+        last["resistance"]
+    )
+
+    previous_resistance = float(
+        last.get(
+            "previous_resistance",
+            np.nan
+        )
+    )
+
+    atr_val = float(
+        last["atr"]
+    )
+
+    if (
+        not np.isfinite(atr_val) or
+        atr_val <= 0
+    ):
+
         atr_val = entry * 0.03
 
-    bullish = last["ema20"] > last["ema50"]
+    # =====================================================
+    # Fibonacci Extensions
+    # =====================================================
+
+    fib_ext_1272 = float(
+        last.get(
+            "fib_ext_1272",
+            np.nan
+        )
+    )
+
+    fib_ext_1618 = float(
+        last.get(
+            "fib_ext_1618",
+            np.nan
+        )
+    )
+
+    fib_ext_2000 = float(
+        last.get(
+            "fib_ext_2000",
+            np.nan
+        )
+    )
 
     # =====================================================
-    # Stop Loss — نفس المنطق الأصلي
+    # Daily Resistance
     # =====================================================
+
+    daily_levels = []
+
+    for level in [
+        previous_resistance,
+        resistance
+    ]:
+
+        if (
+            np.isfinite(level) and
+            level > entry
+        ):
+
+            daily_levels.append(
+                float(level)
+            )
+
+    # =====================================================
+    # Weekly Resistance
+    # =====================================================
+
+    weekly_levels = []
+
+    if (
+        df_w is not None and
+        not df_w.empty
+    ):
+
+        try:
+
+            w_high = (
+                df_w["High"]
+                .rolling(
+                    20,
+                    min_periods=10
+                )
+                .max()
+                .shift(1)
+                .iloc[-1]
+            )
+
+            if (
+                np.isfinite(w_high) and
+                w_high > entry
+            ):
+
+                weekly_levels.append(
+                    float(w_high)
+                )
+
+        except Exception:
+            pass
+
+    # =====================================================
+    # Monthly Resistance
+    # =====================================================
+
+    monthly_levels = []
+
+    if (
+        df_m is not None and
+        not df_m.empty
+    ):
+
+        try:
+
+            m_high = (
+                df_m["High"]
+                .rolling(
+                    12,
+                    min_periods=6
+                )
+                .max()
+                .shift(1)
+                .iloc[-1]
+            )
+
+            if (
+                np.isfinite(m_high) and
+                m_high > entry
+            ):
+
+                monthly_levels.append(
+                    float(m_high)
+                )
+
+        except Exception:
+            pass
+
+    # =====================================================
+    # Fibonacci Extension Levels
+    # =====================================================
+
+    fib_levels = []
+
+    for level in [
+        fib_ext_1272,
+        fib_ext_1618,
+        fib_ext_2000
+    ]:
+
+        if (
+            np.isfinite(level) and
+            level > entry
+        ):
+
+            fib_levels.append(
+                float(level)
+            )
+
+    # =====================================================
+    # اتجاه السهم
+    # =====================================================
+
+    bullish = (
+        last["ema20"] >
+        last["ema50"]
+    )
+
+    strong_trend = (
+        last["adx"] >= 25
+    )
+
+    very_strong_trend = (
+        last["adx"] >= 30
+    )
+
+    breakout = bool(
+        last.get(
+            "breakout",
+            False
+        )
+    )
+
+    volume_ratio = float(
+        last.get(
+            "volume_ratio",
+            1.0
+        )
+    )
+
+    strong_volume = (
+        volume_ratio >= 1.5
+    )
+
+    # =====================================================
+    # Stop Loss
+    # =====================================================
+
     if bullish:
-        atr_stop = entry - atr_val * 1.5
-        support_stop = support - atr_val * 0.25
-        candidates = [x for x in [atr_stop, support_stop] if x > 0 and x < entry]
-        stop = max(candidates) if candidates else entry - atr_val * 1.5
+
+        atr_stop = (
+            entry -
+            atr_val * 1.5
+        )
+
+        support_stop = (
+            support -
+            atr_val * 0.25
+        )
+
+        candidates = [
+            x for x in [
+                atr_stop,
+                support_stop
+            ]
+            if (
+                np.isfinite(x) and
+                x > 0 and
+                x < entry
+            )
+        ]
+
+        if candidates:
+
+            stop = max(
+                candidates
+            )
+
+        else:
+
+            stop = (
+                entry -
+                atr_val * 1.5
+            )
+
     else:
-        stop = entry - atr_val * 1.2
+
+        stop = (
+            entry -
+            atr_val * 1.2
+        )
+
         if stop <= 0:
-            stop = entry * 0.95
 
-    risk_per_share = entry - stop
-    if risk_per_share <= 0:
-        risk_per_share = entry * 0.03
-        stop = entry - risk_per_share
-
-    risk_pct_actual = risk_per_share / entry
-    allowed_loss = capital * risk_percent / 100
-    position_size = allowed_loss / risk_per_share
-    position_value = position_size * entry
+            stop = (
+                entry * 0.95
+            )
 
     # =====================================================
-    # 🎯 Target Engine — أهداف بعيدة مبنية على مستويات سعرية
+    # Risk %
     # =====================================================
-    targets = build_target_engine(df_d, entry, atr_val)
-    target_prices = [x["price"] for x in targets]
-    target_profits = [x["profit_pct"] for x in targets]
 
-    # ضمان وجود 3 أهداف على الأقل
-    while len(target_prices) < 3:
-        next_price = max(target_prices[-1] + max(atr_val * 0.65, entry * 0.04), entry + atr_val * (2.5 + len(target_prices))) if target_prices else entry + atr_val * 2.5
-        target_prices.append(float(next_price))
-        target_profits.append(float((next_price - entry) / entry * 100))
+    risk_per_share = (
+        entry -
+        stop
+    )
 
-    tp1, tp2, tp3 = target_prices[:3]
-    tp4 = target_prices[3] if len(target_prices) >= 4 else None
-    tp1_profit, tp2_profit, tp3_profit = target_profits[:3]
-    tp4_profit = target_profits[3] if len(target_profits) >= 4 else None
+    if (
+        risk_per_share <= 0 or
+        not np.isfinite(risk_per_share)
+    ):
 
-    rr1 = (tp1 - entry) / (risk_per_share + 1e-9)
-    rr2 = (tp2 - entry) / (risk_per_share + 1e-9)
-    rr3 = (tp3 - entry) / (risk_per_share + 1e-9)
-    rr4 = ((tp4 - entry) / (risk_per_share + 1e-9)) if tp4 is not None else None
+        risk_per_share = (
+            entry * 0.03
+        )
+
+        stop = (
+            entry -
+            risk_per_share
+        )
+
+    risk_pct_actual = (
+        risk_per_share /
+        entry
+    )
+
+    # =====================================================
+    # Position Size
+    # =====================================================
+
+    allowed_loss = (
+        capital *
+        risk_percent /
+        100
+    )
+
+    position_size = (
+        allowed_loss /
+        risk_per_share
+    )
+
+    position_value = (
+        position_size *
+        entry
+    )
+
+    # =====================================================
+    # Professional Target Engine
+    # =====================================================
+
+    atr_distance = atr_val
+
+    # =====================================================
+    # بناء المستويات المحتملة
+    # =====================================================
+
+    all_levels = []
+
+    all_levels.extend(
+        daily_levels
+    )
+
+    all_levels.extend(
+        weekly_levels
+    )
+
+    all_levels.extend(
+        monthly_levels
+    )
+
+    all_levels.extend(
+        fib_levels
+    )
+
+    # =====================================================
+    # ATR Targets
+    # =====================================================
+
+    atr_target_1 = (
+        entry +
+        atr_distance * 1.5
+    )
+
+    atr_target_2 = (
+        entry +
+        atr_distance * 2.8
+    )
+
+    atr_target_3 = (
+        entry +
+        atr_distance * 4.5
+    )
+
+    atr_target_4 = (
+        entry +
+        atr_distance * 6.5
+    )
+
+    all_levels.extend([
+        atr_target_1,
+        atr_target_2,
+        atr_target_3,
+        atr_target_4
+    ])
+
+    # =====================================================
+    # تنظيف المستويات
+    # =====================================================
+
+    clean_levels = []
+
+    for level in all_levels:
+
+        try:
+
+            level = float(level)
+
+            if (
+                np.isfinite(level) and
+                level > entry
+            ):
+
+                clean_levels.append(
+                    level
+                )
+
+        except Exception:
+            continue
+
+    clean_levels = sorted(
+        set(
+            round(
+                x,
+                6
+            )
+            for x in clean_levels
+        )
+    )
+
+    # =====================================================
+    # Minimum Gap
+    # =====================================================
+
+    min_gap = max(
+        atr_val * 0.55,
+        entry * 0.015
+    )
+
+    # =====================================================
+    # TP1
+    # =====================================================
+
+    tp1_candidates = [
+        x for x in clean_levels
+        if x >= (
+            entry +
+            atr_val * 1.15
+        )
+    ]
+
+    if tp1_candidates:
+
+        tp1 = min(
+            tp1_candidates
+        )
+
+    else:
+
+        tp1 = atr_target_1
+
+    # =====================================================
+    # TP2
+    # =====================================================
+
+    tp2_candidates = [
+        x for x in clean_levels
+        if x >= (
+            tp1 +
+            min_gap
+        )
+    ]
+
+    if tp2_candidates:
+
+        structural_tp2 = [
+            x for x in tp2_candidates
+            if x in (
+                daily_levels +
+                weekly_levels +
+                monthly_levels +
+                fib_levels
+            )
+        ]
+
+        if structural_tp2:
+
+            tp2 = min(
+                structural_tp2
+            )
+
+        else:
+
+            tp2 = min(
+                tp2_candidates
+            )
+
+    else:
+
+        tp2 = max(
+            tp1 + min_gap,
+            atr_target_2
+        )
+
+    # =====================================================
+    # TP3
+    # =====================================================
+
+    tp3_candidates = [
+        x for x in clean_levels
+        if x >= (
+            tp2 +
+            min_gap
+        )
+    ]
+
+    if tp3_candidates:
+
+        structural_tp3 = [
+            x for x in tp3_candidates
+            if x in (
+                weekly_levels +
+                monthly_levels +
+                fib_levels
+            )
+        ]
+
+        if structural_tp3:
+
+            tp3 = min(
+                structural_tp3
+            )
+
+        else:
+
+            tp3 = min(
+                tp3_candidates
+            )
+
+    else:
+
+        tp3 = max(
+            tp2 + min_gap,
+            atr_target_3
+        )
+
+    # =====================================================
+    # TP4
+    # =====================================================
+
+    tp4_candidates = [
+        x for x in clean_levels
+        if x >= (
+            tp3 +
+            min_gap
+        )
+    ]
+
+    if tp4_candidates:
+
+        structural_tp4 = [
+            x for x in tp4_candidates
+            if x in (
+                monthly_levels +
+                fib_levels
+            )
+        ]
+
+        if structural_tp4:
+
+            tp4 = max(
+                structural_tp4
+            )
+
+        else:
+
+            tp4 = max(
+                tp4_candidates
+            )
+
+    else:
+
+        tp4 = max(
+            tp3 + min_gap,
+            atr_target_4
+        )
+
+    # =====================================================
+    # فلتر قوة الاتجاه
+    # =====================================================
+
+    if not strong_trend:
+
+        tp4 = min(
+            tp4,
+            entry +
+            atr_val * 6.0
+        )
+
+    # =====================================================
+    # اتجاه قوي + Breakout + Volume
+    # =====================================================
+
+    if (
+        strong_trend and
+        breakout and
+        strong_volume
+    ):
+
+        tp3 = max(
+            tp3,
+            entry +
+            atr_val * 4.5
+        )
+
+        tp4 = max(
+            tp4,
+            entry +
+            atr_val * 7.0
+        )
+
+    # =====================================================
+    # اتجاه قوي جدًا
+    # =====================================================
+
+    if (
+        very_strong_trend and
+        volume_ratio >= 1.5
+    ):
+
+        tp4 = max(
+            tp4,
+            entry +
+            atr_val * 8.0
+        )
+
+    # =====================================================
+    # FINAL TARGET ORDER VALIDATION
+    # =====================================================
+
+    tp1 = max(
+        tp1,
+        entry +
+        atr_val * 1.0
+    )
+
+    tp2 = max(
+        tp2,
+        tp1 +
+        min_gap
+    )
+
+    tp3 = max(
+        tp3,
+        tp2 +
+        min_gap
+    )
+
+    tp4 = max(
+        tp4,
+        tp3 +
+        min_gap
+    )
+
+    # =====================================================
+    # منع الأهداف المبالغ فيها
+    # =====================================================
+
+    max_reasonable = (
+        entry +
+        atr_val * 10
+    )
+
+    tp4 = min(
+        tp4,
+        max_reasonable
+    )
+
+    # إعادة ضمان الترتيب
+    tp3 = min(
+        tp3,
+        tp4 - min_gap
+    )
+
+    tp2 = min(
+        tp2,
+        tp3 - min_gap
+    )
+
+    tp1 = min(
+        tp1,
+        tp2 - min_gap
+    )
+
+    # =====================================================
+    # الأرباح %
+    # =====================================================
+
+    tp1_profit_pct = (
+        (
+            tp1 -
+            entry
+        ) /
+        entry
+    ) * 100
+
+    tp2_profit_pct = (
+        (
+            tp2 -
+            entry
+        ) /
+        entry
+    ) * 100
+
+    tp3_profit_pct = (
+        (
+            tp3 -
+            entry
+        ) /
+        entry
+    ) * 100
+
+    tp4_profit_pct = (
+        (
+            tp4 -
+            entry
+        ) /
+        entry
+    ) * 100
+
+    # =====================================================
+    # Risk / Reward
+    # =====================================================
+
+    rr1 = (
+        tp1 -
+        entry
+    ) / (
+        risk_per_share +
+        1e-9
+    )
+
+    rr2 = (
+        tp2 -
+        entry
+    ) / (
+        risk_per_share +
+        1e-9
+    )
+
+    rr3 = (
+        tp3 -
+        entry
+    ) / (
+        risk_per_share +
+        1e-9
+    )
+
+    rr4 = (
+        tp4 -
+        entry
+    ) / (
+        risk_per_share +
+        1e-9
+    )
 
     return {
+
         "entry": float(entry),
+
         "stop": float(stop),
+
         "tp1": float(tp1),
+
         "tp2": float(tp2),
+
         "tp3": float(tp3),
-        "tp4": float(tp4) if tp4 is not None else None,
-        "tp1_profit_pct": float(tp1_profit),
-        "tp2_profit_pct": float(tp2_profit),
-        "tp3_profit_pct": float(tp3_profit),
-        "tp4_profit_pct": float(tp4_profit) if tp4_profit is not None else None,
-        "tp_count": 4 if tp4 is not None else 3,
-        "tp1_source": targets[0]["source"],
-        "tp2_source": targets[1]["source"],
-        "tp3_source": targets[2]["source"],
-        "tp4_source": targets[3]["source"] if tp4 is not None else "",
-        "risk_pct": float(risk_pct_actual * 100),
+
+        "tp4": float(tp4),
+
+        "tp1_profit_pct": float(
+            tp1_profit_pct
+        ),
+
+        "tp2_profit_pct": float(
+            tp2_profit_pct
+        ),
+
+        "tp3_profit_pct": float(
+            tp3_profit_pct
+        ),
+
+        "tp4_profit_pct": float(
+            tp4_profit_pct
+        ),
+
+        "risk_pct": float(
+            risk_pct_actual * 100
+        ),
+
         "rr1": float(rr1),
+
         "rr2": float(rr2),
+
         "rr3": float(rr3),
-        "rr4": float(rr4) if rr4 is not None else None,
-        "position_size": float(position_size),
-        "position_value": float(position_value)
+
+        "rr4": float(rr4),
+
+        "position_size": float(
+            position_size
+        ),
+
+        "position_value": float(
+            position_value
+        )
     }
 
 
@@ -1385,7 +2033,7 @@ def ai_confidence(
 
 
 # =========================================================
-# 📊 REALISTIC PROBABILITY MODEL
+# 🧠 CONFIDENCE TARGET MODEL
 # =========================================================
 
 def estimate_probabilities(
@@ -1393,12 +2041,10 @@ def estimate_probabilities(
     rr1,
     rr2,
     rr3,
+    rr4,
     alignment,
     adx_val
 ):
-
-    # ده Confidence Model وليس Backtest Probability
-    # يتم إبقاؤه محافظًا ولا يتم تسميته احتمال إحصائي حقيقي
 
     trend_factor = (
         alignment /
@@ -1413,20 +2059,24 @@ def estimate_probabilities(
         )
     )
 
-    tp1 = (
-        base_conf *
-        0.65 +
-        trend_factor *
-        0.20 +
-        momentum_factor *
-        0.15
+    base = (
+        base_conf * 0.60 +
+        trend_factor * 0.25 +
+        momentum_factor * 0.15
     )
 
-    # تحسين حسب R/R
+    # =====================================================
+    # TP1
+    # =====================================================
+
+    tp1 = base
+
     if rr1 >= 2:
+
         tp1 += 0.05
 
-    if rr1 < 1.2:
+    elif rr1 < 1.2:
+
         tp1 -= 0.10
 
     tp1 = min(
@@ -1437,14 +2087,21 @@ def estimate_probabilities(
         )
     )
 
+    # =====================================================
+    # TP2
+    # =====================================================
+
     tp2 = (
-        tp1 *
-        0.78
+        tp1 * 0.82
     )
 
-    if rr2 < 1.5:
+    if rr2 >= 2:
 
-        tp2 *= 0.90
+        tp2 += 0.03
+
+    elif rr2 < 1.5:
+
+        tp2 -= 0.05
 
     tp2 = min(
         0.82,
@@ -1454,27 +2111,59 @@ def estimate_probabilities(
         )
     )
 
+    # =====================================================
+    # TP3
+    # =====================================================
+
     tp3 = (
-        tp2 *
-        0.72
+        tp2 * 0.78
     )
 
-    if rr3 < 2:
+    if rr3 >= 2.5:
 
-        tp3 *= 0.85
+        tp3 += 0.03
+
+    elif rr3 < 2:
+
+        tp3 -= 0.05
 
     tp3 = min(
-        0.72,
+        0.75,
         max(
             0.10,
             tp3
         )
     )
 
+    # =====================================================
+    # TP4
+    # =====================================================
+
+    tp4 = (
+        tp3 * 0.72
+    )
+
+    if rr4 >= 3:
+
+        tp4 += 0.03
+
+    elif rr4 < 2.5:
+
+        tp4 -= 0.05
+
+    tp4 = min(
+        0.68,
+        max(
+            0.08,
+            tp4
+        )
+    )
+
     return (
         tp1,
         tp2,
-        tp3
+        tp3,
+        tp4
     )
 
 
@@ -1653,7 +2342,9 @@ def analyze(
         df_d,
         entry,
         capital,
-        risk_percent
+        risk_percent,
+        df_w,
+        df_m
     )
 
     stop = risk["stop"]
@@ -1661,15 +2352,27 @@ def analyze(
     tp1 = risk["tp1"]
     tp2 = risk["tp2"]
     tp3 = risk["tp3"]
-    tp1_profit_pct = risk["tp1_profit_pct"]
-    tp2_profit_pct = risk["tp2_profit_pct"]
-    tp3_profit_pct = risk["tp3_profit_pct"]
+    tp4 = risk["tp4"]
+
+    tp1_profit_pct = risk[
+        "tp1_profit_pct"
+    ]
+
+    tp2_profit_pct = risk[
+        "tp2_profit_pct"
+    ]
+
+    tp3_profit_pct = risk[
+        "tp3_profit_pct"
+    ]
+
+    tp4_profit_pct = risk[
+        "tp4_profit_pct"
+    ]
 
     rr1 = risk["rr1"]
     rr2 = risk["rr2"]
     rr3 = risk["rr3"]
-    tp4 = risk["tp4"]
-    tp4_profit_pct = risk["tp4_profit_pct"]
     rr4 = risk["rr4"]
 
     volatility = (
@@ -1896,18 +2599,20 @@ def analyze(
     )
 
     # =====================================================
-    # تقدير احتمالات محافظة
+    # تقدير الثقة المحافظة
     # =====================================================
 
     (
         tp1_prob,
         tp2_prob,
-        tp3_prob
+        tp3_prob,
+        tp4_prob
     ) = estimate_probabilities(
         base_conf,
         rr1,
         rr2,
         rr3,
+        rr4,
         alignment,
         adx_val
     )
@@ -1999,12 +2704,30 @@ def analyze(
             2
         ),
 
-        "الهدف الرابع": round(tp4, 2) if tp4 is not None else None,
+        "الهدف الرابع": round(
+            tp4,
+            2
+        ),
 
-        "ربح الهدف الأول %": round(tp1_profit_pct, 2),
-        "ربح الهدف الثاني %": round(tp2_profit_pct, 2),
-        "ربح الهدف الثالث %": round(tp3_profit_pct, 2),
-        "ربح الهدف الرابع %": round(tp4_profit_pct, 2) if tp4_profit_pct is not None else None,
+        "ربح الهدف الأول %": round(
+            tp1_profit_pct,
+            2
+        ),
+
+        "ربح الهدف الثاني %": round(
+            tp2_profit_pct,
+            2
+        ),
+
+        "ربح الهدف الثالث %": round(
+            tp3_profit_pct,
+            2
+        ),
+
+        "ربح الهدف الرابع %": round(
+            tp4_profit_pct,
+            2
+        ),
 
         "احتمال الهدف الأول %": round(
             tp1_prob * 100,
@@ -2018,6 +2741,11 @@ def analyze(
 
         "احتمال الهدف الثالث %": round(
             tp3_prob * 100,
+            1
+        ),
+
+        "احتمال الهدف الرابع %": round(
+            tp4_prob * 100,
             1
         ),
 
@@ -2074,7 +2802,11 @@ def analyze(
             rr3,
             2
         ),
-        "_rr4": round(rr4, 2) if rr4 is not None else None,
+
+        "_rr4": round(
+            rr4,
+            2
+        ),
 
         "_position_size": round(
             risk["position_size"],
@@ -2582,11 +3314,6 @@ if st.button(
     # 📈 الأسهم الناجحة
     # =====================================================
 
-    df_ok = df_all[
-        df_all["الحالة"] ==
-        "✅ تم التحليل"
-    ].copy()
-
     if not df_ok.empty:
 
         # =================================================
@@ -2611,8 +3338,7 @@ if st.button(
         ).copy()
 
         # =================================================
-        # مهم:
-        # نفس أعمدة الجدول القديمة بالضبط
+        # كل الأعمدة القديمة + الأعمدة الجديدة
         # =================================================
 
         preferred_cols = [
@@ -2650,6 +3376,8 @@ if st.button(
             "احتمال الهدف الثاني %",
 
             "احتمال الهدف الثالث %",
+
+            "احتمال الهدف الرابع %",
 
             "مؤشر RSI",
 
@@ -2751,7 +3479,6 @@ if st.button(
         # =================================================
         # 📊 تفاصيل المحرك الداخلي
         # =================================================
-        # لا تظهر في الجداول الرئيسية للحفاظ على شكلها
 
         with st.expander(
             "🔬 معلومات المحرك المتقدمة"
@@ -2802,6 +3529,7 @@ if st.button(
 
                         "_rr3":
                             "R/R TP3",
+
                         "_rr4":
                             "R/R TP4",
 
@@ -2865,9 +3593,9 @@ if st.button(
                 hide_index=True
             )
 
-        # =================================================
-        # ⚠️ الأسهم الفاشلة
-        # =================================================
+    # =====================================================
+    # ⚠️ الأسهم الفاشلة
+    # =====================================================
 
     df_failed = df_all[
         df_all["الحالة"] !=
