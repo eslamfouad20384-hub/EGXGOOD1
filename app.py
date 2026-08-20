@@ -65,15 +65,23 @@ period_daily = st.sidebar.selectbox(
     index=1
 )
 
+# =========================================================
+# تعديل: فترة Weekly أطول لدعم EMA200 بشكل أفضل
+# =========================================================
+
 period_weekly = st.sidebar.selectbox(
     "📅 فترة البيانات الأسبوعية",
-    ["1y", "2y", "3y", "5y"],
+    ["3y", "5y", "10y", "max"],
     index=1
 )
 
+# =========================================================
+# تعديل: فترة Monthly أطول لدعم EMA200 بشكل أفضل
+# =========================================================
+
 period_monthly = st.sidebar.selectbox(
     "📅 فترة البيانات الشهرية",
-    ["3y", "5y", "10y", "max"],
+    ["10y", "15y", "20y", "max"],
     index=1
 )
 
@@ -171,8 +179,8 @@ st.sidebar.info(
 # =========================================================
 
 MIN_DAILY_ROWS = 60
-MIN_WEEKLY_ROWS = 60
-MIN_MONTHLY_ROWS = 50
+MIN_WEEKLY_ROWS = 80
+MIN_MONTHLY_ROWS = 36
 
 DOWNLOAD_RETRIES = 3
 DOWNLOAD_RETRY_DELAY = 2
@@ -569,9 +577,24 @@ def add_indicators(df):
         adjust=False
     ).mean()
 
+    # =====================================================
+    # EMA200
+    # تحسين: عدم اعتبار EMA200 صالحة من أول شمعة
+    # مع السماح بالعمل على الأسهم ذات التاريخ الأقصر
+    # =====================================================
+
+    ema200_min_periods = min(
+        200,
+        max(
+            50,
+            len(df) // 2
+        )
+    )
+
     df["ema200"] = close.ewm(
         span=200,
-        adjust=False
+        adjust=False,
+        min_periods=ema200_min_periods
     ).mean()
 
     # =====================================================
@@ -897,6 +920,9 @@ def add_indicators(df):
 
     # =====================================================
     # Breakout
+    # مهم:
+    # الاعتماد على المقاومة السابقة فقط
+    # وعدم استخدام الشمعة الحالية
     # =====================================================
 
     previous_resistance = (
@@ -1086,8 +1112,17 @@ def determine_entry(
         last["support"]
     )
 
-    resistance = float(
-        last["resistance"]
+    # =====================================================
+    # مهم:
+    # استخدام المقاومة السابقة فقط
+    # وعدم استخدام مقاومة تشمل الشمعة الحالية
+    # =====================================================
+
+    previous_resistance = float(
+        last.get(
+            "previous_resistance",
+            np.nan
+        )
     )
 
     ema20 = float(
@@ -1099,7 +1134,10 @@ def determine_entry(
     )
 
     breakout = bool(
-        last["breakout"]
+        last.get(
+            "breakout",
+            False
+        )
     )
 
     pullback = bool(
@@ -1116,7 +1154,8 @@ def determine_entry(
 
     if (
         breakout and
-        entry > resistance and
+        np.isfinite(previous_resistance) and
+        entry > previous_resistance and
         volume_ratio >= 1.5
     ):
 
@@ -3179,6 +3218,15 @@ if st.button(
     df_all = pd.DataFrame(
         results
     )
+
+    # =====================================================
+    # 📈 الأسهم التي تم تحليلها بنجاح
+    # إصلاح: تعريف df_ok قبل استخدامه
+    # =====================================================
+
+    df_ok = df_all[
+        df_all["الحالة"] == "✅ تم التحليل"
+    ].copy()
 
     # =====================================================
     # 📊 التغطية
