@@ -11,14 +11,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # =========================================================
 
 st.set_page_config(
-    page_title="EGX AI PRO MAX v6 - عربي",
+    page_title="EGX AI PRO MAX v7 - عربي",
     page_icon="📈",
     layout="wide"
 )
 
-st.title("🚀 EGX AI PRO MAX v6")
+st.title("🚀 EGX AI PRO MAX v7")
 st.caption(
-    "📊 فحص الأسهم المصرية • تحليل متعدد الفترات • تقييم ذكي • محرك بيانات سريع"
+    "📊 فحص الأسهم المصرية • تحليل متعدد الفترات • Entry/Target Engine احترافي • Risk Management"
 )
 
 # =========================================================
@@ -39,18 +39,15 @@ EGX100 = [
     "RAYA.CA", "VERT.CA", "EGAL.CA", "ECAP.CA", "MPRC.CA",
     "NCCW.CA", "SCEM.CA", "ARAB.CA", "GDWA.CA", "ELEC.CA",
     "IRON.CA", "ATQA.CA", "EGCH.CA", "KIMA.CA", "ALCN.CA",
-    "MPCO.CA", "ELSH.CA", "NCCW.CA", "MEPA.CA", "ODIN.CA",
-    "EGAS.CA", "MENA.CA", "RACC.CA", "PRCL.CA", "BINV.CA",
-    "EDBM.CA", "MCQE.CA", "MOIL.CA", "NIPH.CA", "ISPH.CA",
-    "DICE.CA", "BINV.CA", "IDHC.CA", "UNIT.CA", "PHAR.CA",
-    "TRTO.CA", "ALRA.CA", "FARE.CA", "ICFC.CA", "MISr.CA",
-    "MOBI.CA", "RACC.CA", "ELKA.CA", "NILE.CA", "ATLC.CA",
-    "COSG.CA", "MEDA.CA", "ELSH.CA", "AMPI.CA", "COPR.CA"
+    "MPCO.CA", "ELSH.CA", "MEPA.CA", "ODIN.CA", "EGAS.CA",
+    "RACC.CA", "PRCL.CA", "BINV.CA", "EDBM.CA", "MCQE.CA",
+    "MOIL.CA", "NIPH.CA", "ISPH.CA", "DICE.CA", "IDHC.CA",
+    "UNIT.CA", "PHAR.CA", "TRTO.CA", "ALRA.CA", "FARE.CA",
+    "ICFC.CA", "MISr.CA", "MOBI.CA", "ELKA.CA", "NILE.CA",
+    "ATLC.CA", "COSG.CA", "MEDA.CA", "AMPI.CA", "COPR.CA"
 ]
 
-# إزالة التكرارات مع الحفاظ على الترتيب
 EGX100 = list(dict.fromkeys(EGX100))
-
 TOTAL_STOCKS = len(EGX100)
 
 # =========================================================
@@ -65,19 +62,11 @@ period_daily = st.sidebar.selectbox(
     index=1
 )
 
-# =========================================================
-# تعديل: فترة Weekly أطول لدعم EMA200 بشكل أفضل
-# =========================================================
-
 period_weekly = st.sidebar.selectbox(
     "📅 فترة البيانات الأسبوعية",
     ["3y", "5y", "10y", "max"],
     index=1
 )
-
-# =========================================================
-# تعديل: فترة Monthly أطول لدعم EMA200 بشكل أفضل
-# =========================================================
 
 period_monthly = st.sidebar.selectbox(
     "📅 فترة البيانات الشهرية",
@@ -102,7 +91,7 @@ top_n = st.sidebar.slider(
 )
 
 # =========================================================
-# 💰 إعدادات إدارة رأس المال
+# 💰 إدارة رأس المال
 # =========================================================
 
 st.sidebar.markdown("---")
@@ -141,36 +130,23 @@ st.sidebar.info(
     """
     📌 النظام يقوم بفحص:
 
-    • الاتجاه اليومي
-    • الاتجاه الأسبوعي
-    • الاتجاه الشهري
-    • EMA20
-    • EMA50
-    • EMA200
-    • RSI
-    • MACD
-    • Volume
-    • OBV
-    • MFI
-    • Stochastic RSI
-    • VWAP
+    • Daily / Weekly / Monthly
+    • EMA20 / EMA50 / EMA200
+    • RSI / MACD / ADX / ATR
+    • OBV / MFI / Stochastic RSI / VWAP
     • Volume Ratio
-    • ATR
-    • ADX
-    • الدعم والمقاومة
+    • Support / Resistance
+    • Swing High / Swing Low
     • Fibonacci
     • Fibonacci Extensions
-    • Breakout
-    • Pullback
-    • Trend Slope
+    • Professional Pullback
+    • Professional Breakout
     • Trend Alignment
-    • Entry Engine
-    • Risk Engine
-    • Professional Target Engine
-    • التقييم النهائي
-    • الدخول
-    • وقف الخسارة
-    • 4 أهداف
+    • Entry Quality
+    • Target Quality
+    • Risk / Reward
+    • Risk Management
+    • 4 Targets
     """
 )
 
@@ -184,6 +160,8 @@ MIN_MONTHLY_ROWS = 36
 
 DOWNLOAD_RETRIES = 3
 DOWNLOAD_RETRY_DELAY = 2
+
+EMA200_REQUIRED_ROWS = 200
 
 # =========================================================
 # 📥 DATA ENGINE
@@ -218,7 +196,6 @@ def load_data(symbols, period, interval):
             )
 
             if data is not None and not data.empty:
-
                 return data
 
             last_error = "Yahoo returned empty data"
@@ -246,12 +223,7 @@ def extract_symbol_data(data, symbol):
     try:
 
         if data is None or data.empty:
-
             return pd.DataFrame()
-
-        # -------------------------------------------------
-        # MultiIndex
-        # -------------------------------------------------
 
         if isinstance(data.columns, pd.MultiIndex):
 
@@ -278,10 +250,6 @@ def extract_symbol_data(data, symbol):
 
             df = data.copy()
 
-        # -------------------------------------------------
-        # تنظيف أسماء الأعمدة
-        # -------------------------------------------------
-
         df.columns = [
             str(c).strip()
             for c in df.columns
@@ -304,20 +272,12 @@ def extract_symbol_data(data, symbol):
 
         df = df[required].copy()
 
-        # -------------------------------------------------
-        # تحويل البيانات لأرقام
-        # -------------------------------------------------
-
         for col in required:
 
             df[col] = pd.to_numeric(
                 df[col],
                 errors="coerce"
             )
-
-        # -------------------------------------------------
-        # إزالة القيم غير الصحيحة
-        # -------------------------------------------------
 
         df = df.replace(
             [np.inf, -np.inf],
@@ -333,12 +293,7 @@ def extract_symbol_data(data, symbol):
             ]
         )
 
-        # Volume ممكن يكون صفر
         df["Volume"] = df["Volume"].fillna(0)
-
-        # -------------------------------------------------
-        # Validation
-        # -------------------------------------------------
 
         df = df[
             (df["High"] >= df["Low"]) &
@@ -348,7 +303,6 @@ def extract_symbol_data(data, symbol):
 
         df = df.sort_index()
 
-        # إزالة التواريخ المكررة
         df = df[
             ~df.index.duplicated(
                 keep="last"
@@ -384,10 +338,7 @@ def calculate_data_quality(df):
         "Volume"
     ]
 
-    total_cells = (
-        len(df) *
-        len(required)
-    )
+    total_cells = len(df) * len(required)
 
     missing_cells = int(
         df[required]
@@ -409,12 +360,9 @@ def calculate_data_quality(df):
         100.0 - missing_pct
     )
 
-    # خصم بسيط لو عدد الشموع قليل
     if len(df) < 50:
 
-        quality *= (
-            len(df) / 50
-        )
+        quality *= len(df) / 50
 
     return {
         "quality": round(
@@ -466,7 +414,6 @@ def adx(df, period=14):
     close = df["Close"]
 
     plus_dm_raw = high.diff()
-
     minus_dm_raw = -low.diff()
 
     plus_dm = np.where(
@@ -547,6 +494,37 @@ def adx(df, period=14):
 
 
 # =========================================================
+# 📐 خطي Regression بسيط
+# =========================================================
+
+def linear_slope(series, window=10):
+
+    if len(series) < window:
+        return np.nan
+
+    values = series.iloc[-window:].values.astype(float)
+
+    if not np.all(np.isfinite(values)):
+        return np.nan
+
+    x = np.arange(window)
+
+    try:
+
+        slope = np.polyfit(
+            x,
+            values,
+            1
+        )[0]
+
+        return float(slope)
+
+    except Exception:
+
+        return np.nan
+
+
+# =========================================================
 # 📈 TECHNICAL ENGINE
 # =========================================================
 
@@ -555,7 +533,6 @@ def add_indicators(df):
     df = df.copy()
 
     if len(df) < 30:
-
         return df
 
     close = df["Close"]
@@ -564,13 +541,17 @@ def add_indicators(df):
     vol = df["Volume"]
 
     # =====================================================
-    # EMA
+    # EMA20
     # =====================================================
 
     df["ema20"] = close.ewm(
         span=20,
         adjust=False
     ).mean()
+
+    # =====================================================
+    # EMA50
+    # =====================================================
 
     df["ema50"] = close.ewm(
         span=50,
@@ -579,23 +560,25 @@ def add_indicators(df):
 
     # =====================================================
     # EMA200
-    # تحسين: عدم اعتبار EMA200 صالحة من أول شمعة
-    # مع السماح بالعمل على الأسهم ذات التاريخ الأقصر
+    #
+    # مهم:
+    # لا نعتبر EMA200 مكتملًا إلا بعد 200 شمعة
     # =====================================================
 
-    ema200_min_periods = min(
-        200,
-        max(
-            50,
-            len(df) // 2
-        )
-    )
+    if len(df) >= EMA200_REQUIRED_ROWS:
 
-    df["ema200"] = close.ewm(
-        span=200,
-        adjust=False,
-        min_periods=ema200_min_periods
-    ).mean()
+        df["ema200"] = close.ewm(
+            span=200,
+            adjust=False,
+            min_periods=200
+        ).mean()
+
+        df["ema200_complete"] = True
+
+    else:
+
+        df["ema200"] = np.nan
+        df["ema200_complete"] = False
 
     # =====================================================
     # RSI
@@ -669,10 +652,16 @@ def add_indicators(df):
             .mean()
         )
 
+        df["obv_slope"] = (
+            df["obv"] -
+            df["obv"].shift(5)
+        )
+
     except Exception:
 
         df["obv"] = np.nan
         df["obv_ma"] = np.nan
+        df["obv_slope"] = np.nan
 
     # =====================================================
     # MFI
@@ -721,11 +710,17 @@ def add_indicators(df):
             stoch.stochrsi_d()
         )
 
+        df["stoch_rsi_k_slope"] = (
+            df["stoch_rsi_k"] -
+            df["stoch_rsi_k"].shift(1)
+        )
+
     except Exception:
 
         df["stoch_rsi"] = np.nan
         df["stoch_rsi_k"] = np.nan
         df["stoch_rsi_d"] = np.nan
+        df["stoch_rsi_k_slope"] = np.nan
 
     # =====================================================
     # VWAP
@@ -739,9 +734,7 @@ def add_indicators(df):
             close
         ) / 3
 
-        cumulative_volume = (
-            vol.cumsum()
-        )
+        cumulative_volume = vol.cumsum()
 
         df["vwap"] = (
             (
@@ -755,9 +748,18 @@ def add_indicators(df):
             )
         )
 
+        df["vwap_distance"] = (
+            close -
+            df["vwap"]
+        ) / (
+            close +
+            1e-9
+        )
+
     except Exception:
 
         df["vwap"] = np.nan
+        df["vwap_distance"] = np.nan
 
     # =====================================================
     # ATR
@@ -802,6 +804,76 @@ def add_indicators(df):
             min_periods=10
         )
         .max()
+    )
+
+    # =====================================================
+    # Previous Support / Resistance
+    # =====================================================
+
+    df["previous_support"] = (
+        low
+        .rolling(
+            20,
+            min_periods=10
+        )
+        .min()
+        .shift(1)
+    )
+
+    df["previous_resistance"] = (
+        high
+        .rolling(
+            20,
+            min_periods=10
+        )
+        .max()
+        .shift(1)
+    )
+
+    # =====================================================
+    # Swing High / Swing Low
+    #
+    # نستخدم مستويات تاريخية حقيقية داخل النوافذ
+    # =====================================================
+
+    df["swing_high_20"] = (
+        high
+        .rolling(
+            20,
+            min_periods=10
+        )
+        .max()
+        .shift(1)
+    )
+
+    df["swing_low_20"] = (
+        low
+        .rolling(
+            20,
+            min_periods=10
+        )
+        .min()
+        .shift(1)
+    )
+
+    df["swing_high_60"] = (
+        high
+        .rolling(
+            60,
+            min_periods=20
+        )
+        .max()
+        .shift(1)
+    )
+
+    df["swing_low_60"] = (
+        low
+        .rolling(
+            60,
+            min_periods=20
+        )
+        .min()
+        .shift(1)
     )
 
     # =====================================================
@@ -857,7 +929,7 @@ def add_indicators(df):
     )
 
     # =====================================================
-    # Fibonacci Extensions - أهداف ممتدة
+    # Fibonacci Extensions
     # =====================================================
 
     df["fib_ext_1272"] = (
@@ -873,31 +945,6 @@ def add_indicators(df):
     df["fib_ext_2000"] = (
         swing_low +
         fib_range * 2.000
-    )
-
-    # =====================================================
-    # Previous Support / Resistance
-    # مهم: لا نعتمد على الشمعة الحالية
-    # =====================================================
-
-    df["previous_support"] = (
-        low
-        .rolling(
-            20,
-            min_periods=10
-        )
-        .min()
-        .shift(1)
-    )
-
-    df["previous_resistance"] = (
-        high
-        .rolling(
-            20,
-            min_periods=10
-        )
-        .max()
-        .shift(1)
     )
 
     # =====================================================
@@ -919,10 +966,50 @@ def add_indicators(df):
     )
 
     # =====================================================
-    # Breakout
-    # مهم:
-    # الاعتماد على المقاومة السابقة فقط
-    # وعدم استخدام الشمعة الحالية
+    # Candle Body
+    # =====================================================
+
+    candle_range = (
+        high -
+        low
+    ).replace(
+        0,
+        np.nan
+    )
+
+    df["body_pct"] = (
+        abs(
+            close -
+            df["Open"]
+        ) /
+        candle_range
+    )
+
+    df["bullish_candle"] = (
+        close >
+        df["Open"]
+    )
+
+    # =====================================================
+    # ATR مناسب للاختراق
+    # =====================================================
+
+    df["atr_expansion"] = (
+        df["atr"] /
+        (
+            df["atr"]
+            .rolling(
+                20,
+                min_periods=10
+            )
+            .mean()
+            +
+            1e-9
+        )
+    )
+
+    # =====================================================
+    # Breakout متقدم
     # =====================================================
 
     previous_resistance = (
@@ -935,18 +1022,56 @@ def add_indicators(df):
         .shift(1)
     )
 
-    df["breakout"] = (
+    close_above_resistance = (
+        close >
+        previous_resistance
+    )
+
+    breakout_volume = (
+        df["volume_ratio"] >= 1.30
+    )
+
+    breakout_volume_strong = (
+        df["volume_ratio"] >= 1.50
+    )
+
+    atr_is_healthy = (
+        df["atr_pct"] >= 0.015
+    )
+
+    atr_not_extreme = (
+        df["atr_pct"] <= 0.12
+    )
+
+    candle_quality = (
+        df["body_pct"] >= 0.45
+    )
+
+    bullish_candle = (
+        df["bullish_candle"]
+    )
+
+    trend_breakout = (
         (
-            close >
-            previous_resistance
+            close > df["ema20"]
         ) &
         (
-            df["volume_ratio"] >= 1.2
+            df["ema20"] > df["ema50"]
         )
     )
 
+    df["breakout"] = (
+        close_above_resistance &
+        breakout_volume &
+        atr_is_healthy &
+        atr_not_extreme &
+        candle_quality &
+        bullish_candle &
+        trend_breakout
+    )
+
     # =====================================================
-    # Pullback
+    # Pullback متقدم
     # =====================================================
 
     distance_ema20 = (
@@ -965,16 +1090,108 @@ def add_indicators(df):
         (close + 1e-9)
     )
 
+    near_ema20 = (
+        distance_ema20 <= 0.025
+    )
+
+    near_ema50 = (
+        distance_ema50 <= 0.035
+    )
+
+    trend_bullish = (
+        (close > df["ema50"]) &
+        (df["ema20"] > df["ema50"]) &
+        (df["ema20_slope"] > 0)
+    )
+
+    support_near = (
+        (
+            abs(
+                close -
+                df["previous_support"]
+            ) /
+            (close + 1e-9)
+        ) <= 0.04
+    )
+
+    fib_support_near = (
+        (
+            (
+                abs(close - df["fib_382"]) /
+                (close + 1e-9)
+            ) <= 0.025
+        )
+        |
+        (
+            (
+                abs(close - df["fib_500"]) /
+                (close + 1e-9)
+            ) <= 0.025
+        )
+        |
+        (
+            (
+                abs(close - df["fib_618"]) /
+                (close + 1e-9)
+            ) <= 0.025
+        )
+    )
+
+    # انخفاض ضغط البيع:
+    # حجم البيع الحالي ليس أعلى بشكل حاد
+    # والسهم لا يغلق بالقرب من قاع الشمعة
+    close_location = (
+        close -
+        low
+    ) / (
+        candle_range +
+        1e-9
+    )
+
+    selling_pressure_reduced = (
+        (
+            df["volume_ratio"] <= 1.30
+        ) &
+        (
+            close_location >= 0.45
+        )
+    )
+
+    bullish_confirmation = (
+        (
+            bullish_candle &
+            (
+                body := df["body_pct"]
+            ).ge(0.35)
+        )
+        |
+        (
+            close >
+            df["ema20"]
+        )
+    )
+
+    pullback_score = (
+        trend_bullish.astype(int) * 2 +
+        (
+            near_ema20 |
+            near_ema50
+        ).astype(int) * 2 +
+        support_near.astype(int) +
+        fib_support_near.astype(int) +
+        selling_pressure_reduced.astype(int) +
+        bullish_confirmation.astype(int)
+    )
+
+    df["pullback_quality_score"] = (
+        pullback_score
+    )
+
     df["pullback"] = (
         (
-            distance_ema20 <= 0.025
-        ) |
-        (
-            distance_ema50 <= 0.035
-        )
-    ) & (
-        close >=
-        df["ema50"] * 0.97
+            pullback_score >= 6
+        ) &
+        trend_bullish
     )
 
     return df
@@ -988,81 +1205,86 @@ def market_regime(last):
 
     score = 0
 
-    if last["Close"] > last["ema200"]:
-        score += 1
+    checks = [
+        (
+            np.isfinite(last.get("ema200", np.nan)) and
+            last["Close"] > last["ema200"]
+        ),
+        last["ema20"] > last["ema50"],
+        (
+            np.isfinite(last.get("ema200", np.nan)) and
+            last["ema50"] > last["ema200"]
+        ),
+        last["macd"] > last["macd_signal"],
+        last["rsi"] > 50,
+        last["adx"] > 20
+    ]
 
-    if last["ema20"] > last["ema50"]:
-        score += 1
-
-    if last["ema50"] > last["ema200"]:
-        score += 1
-
-    if last["macd"] > last["macd_signal"]:
-        score += 1
-
-    if last["rsi"] > 50:
-        score += 1
-
-    if last["adx"] > 20:
-        score += 1
+    score = sum(checks)
 
     if score >= 6:
-
         return "🚀 قوي جداً"
 
     elif score >= 4:
-
         return "🟢 صعود"
 
     elif score >= 3:
-
         return "🟡 محايد"
 
     else:
-
         return "🔴 هبوط"
 
 
 # =========================================================
-# 📊 TREND ALIGNMENT SCORE
+# 📊 TIMEFRAME SCORE
 # =========================================================
 
 def timeframe_score(df):
 
     if df is None or df.empty:
-
         return 0
 
     last = df.iloc[-1]
 
     score = 0
 
-    # السعر مقابل EMA200
-    if last["Close"] > last["ema200"]:
+    if (
+        np.isfinite(last.get("ema200", np.nan)) and
+        last["Close"] > last["ema200"]
+    ):
         score += 25
 
-    # EMA20 / EMA50
     if last["ema20"] > last["ema50"]:
         score += 20
 
-    # EMA50 / EMA200
-    if last["ema50"] > last["ema200"]:
+    if (
+        np.isfinite(last.get("ema200", np.nan)) and
+        last["ema50"] > last["ema200"]
+    ):
         score += 20
 
-    # MACD
     if last["macd"] > last["macd_signal"]:
         score += 15
 
-    # RSI
     if last["rsi"] > 50:
         score += 10
 
-    # Trend Slope
     if last["ema20_slope"] > 0:
         score += 10
 
+    # لا نعطي Score EMA200 كامل إذا غير مكتمل
+    if not bool(last.get("ema200_complete", False)):
+        score = min(
+            score,
+            55
+        )
+
     return score
 
+
+# =========================================================
+# 📊 TREND ALIGNMENT
+# =========================================================
 
 def trend_alignment_score(
     df_d,
@@ -1098,25 +1320,140 @@ def trend_alignment_score(
 
 
 # =========================================================
-# 🎯 ENTRY ENGINE
+# 🎯 حساب Pullback Entry
+# =========================================================
+
+def calculate_pullback_entry(df_d):
+
+    last = df_d.iloc[-1]
+
+    close = float(last["Close"])
+    ema20 = float(last["ema20"])
+    ema50 = float(last["ema50"])
+
+    levels = []
+
+    for name, level in [
+        (
+            "EMA20",
+            ema20
+        ),
+        (
+            "EMA50",
+            ema50
+        ),
+        (
+            "Support",
+            last.get(
+                "previous_support",
+                np.nan
+            )
+        ),
+        (
+            "Fib 38.2%",
+            last.get(
+                "fib_382",
+                np.nan
+            )
+        ),
+        (
+            "Fib 50%",
+            last.get(
+                "fib_500",
+                np.nan
+            )
+        ),
+        (
+            "Fib 61.8%",
+            last.get(
+                "fib_618",
+                np.nan
+            )
+        )
+    ]:
+
+        try:
+
+            level = float(level)
+
+            if (
+                np.isfinite(level) and
+                level > 0 and
+                level <= close * 1.02
+            ):
+
+                levels.append(
+                    (
+                        name,
+                        level
+                    )
+                )
+
+        except Exception:
+            continue
+
+    if not levels:
+
+        return close, "لا توجد منطقة Pullback واضحة"
+
+    # نختار أقرب مستوى دعم أسفل السعر
+    below = [
+        item for item in levels
+        if item[1] <= close
+    ]
+
+    if below:
+
+        name, price = max(
+            below,
+            key=lambda x: x[1]
+        )
+
+    else:
+
+        name, price = min(
+            levels,
+            key=lambda x: abs(
+                x[1] - close
+            )
+        )
+
+    # لا نسمح بسعر دخول Pullback بعيد جدًا عن السوق
+    max_pullback_distance = max(
+        float(last["atr"]) * 1.5,
+        close * 0.07
+    )
+
+    if (
+        close - price >
+        max_pullback_distance
+    ):
+
+        return (
+            close,
+            "Pullback بعيد؛ الدخول عند تأكيد السعر الحالي"
+        )
+
+    return (
+        float(price),
+        f"منطقة {name}"
+    )
+
+
+# =========================================================
+# 🎯 Entry Engine
 # =========================================================
 
 def determine_entry(
     df_d,
-    entry
+    alignment
 ):
 
     last = df_d.iloc[-1]
 
-    support = float(
-        last["support"]
+    market_price = float(
+        last["Close"]
     )
-
-    # =====================================================
-    # مهم:
-    # استخدام المقاومة السابقة فقط
-    # وعدم استخدام مقاومة تشمل الشمعة الحالية
-    # =====================================================
 
     previous_resistance = float(
         last.get(
@@ -1141,75 +1478,213 @@ def determine_entry(
     )
 
     pullback = bool(
-        last["pullback"]
+        last.get(
+            "pullback",
+            False
+        )
     )
 
     volume_ratio = float(
         last["volume_ratio"]
     )
 
+    atr_pct = float(
+        last["atr_pct"]
+    )
+
+    body_pct = float(
+        last.get(
+            "body_pct",
+            0
+        )
+    )
+
     # =====================================================
-    # 1. Breakout
+    # 1️⃣ Breakout
     # =====================================================
 
     if (
         breakout and
         np.isfinite(previous_resistance) and
-        entry > previous_resistance and
-        volume_ratio >= 1.5
+        market_price > previous_resistance and
+        volume_ratio >= 1.5 and
+        0.015 <= atr_pct <= 0.12 and
+        body_pct >= 0.45 and
+        alignment >= 60
     ):
 
         return {
             "type": "دخول اختراق",
-            "price": entry
+            "price": market_price,
+            "reason": (
+                "اختراق مقاومة سابقة + حجم قوي + "
+                "شمعة اختراق جيدة + ATR مناسب + "
+                "Trend Alignment قوي"
+            )
         }
 
     # =====================================================
-    # 2. Pullback
+    # 2️⃣ Professional Pullback
     # =====================================================
 
     if (
         pullback and
-        ema20 > ema50
+        ema20 > ema50 and
+        alignment >= 55
     ):
 
-        pullback_price = max(
-            support,
-            min(
-                ema20,
-                ema50
+        pullback_price, pullback_reason = (
+            calculate_pullback_entry(
+                df_d
             )
         )
 
         return {
             "type": "دخول عند Pullback",
-            "price": pullback_price
+            "price": pullback_price,
+            "reason": (
+                "اتجاه صاعد + منطقة دعم/EMA/Fibonacci + "
+                "انخفاض ضغط البيع + تأكيد سعري | "
+                + pullback_reason
+            )
         }
 
     # =====================================================
-    # 3. Immediate
+    # 3️⃣ Immediate
     # =====================================================
 
     if (
-        entry > ema20 and
-        entry > ema50 and
+        market_price > ema20 and
+        market_price > ema50 and
         last["rsi"] >= 50 and
-        last["macd"] > last["macd_signal"]
+        last["macd"] > last["macd_signal"] and
+        market_price > last["vwap"] and
+        volume_ratio >= 1.0 and
+        alignment >= 50
     ):
 
         return {
             "type": "دخول فوري",
-            "price": entry
+            "price": market_price,
+            "reason": (
+                "السعر فوق EMA20/50 وVWAP + "
+                "RSI إيجابي + MACD إيجابي + "
+                "حجم مقبول + Trend Alignment"
+            )
         }
 
     # =====================================================
-    # 4. Confirmation
+    # 4️⃣ Confirmation
     # =====================================================
 
     return {
         "type": "انتظار تأكيد",
-        "price": entry
+        "price": market_price,
+        "reason": (
+            "لا توجد حاليًا شروط كافية "
+            "لدخول اختراق أو Pullback أو دخول فوري"
+        )
     }
+
+
+# =========================================================
+# 🎯 TARGET ENGINE HELPERS
+# =========================================================
+
+def add_target_level(
+    levels,
+    price,
+    reason,
+    category
+):
+
+    try:
+
+        price = float(price)
+
+        if (
+            np.isfinite(price) and
+            price > 0
+        ):
+
+            levels.append({
+                "price": price,
+                "reason": reason,
+                "category": category
+            })
+
+    except Exception:
+        pass
+
+
+def deduplicate_levels(
+    levels,
+    tolerance
+):
+
+    if not levels:
+        return []
+
+    levels = sorted(
+        levels,
+        key=lambda x: x["price"]
+    )
+
+    result = []
+
+    for level in levels:
+
+        if not result:
+
+            result.append(level)
+
+        else:
+
+            previous = result[-1]
+
+            relative_gap = (
+                abs(
+                    level["price"] -
+                    previous["price"]
+                )
+                /
+                max(
+                    previous["price"],
+                    1e-9
+                )
+            )
+
+            if relative_gap >= tolerance:
+
+                result.append(level)
+
+            else:
+
+                # نحتفظ بالأعلى أولوية
+                priority = {
+                    "Resistance": 1,
+                    "Swing High": 2,
+                    "Weekly": 3,
+                    "Monthly": 4,
+                    "Fibonacci": 5,
+                    "ATR": 6
+                }
+
+                old_priority = priority.get(
+                    previous["category"],
+                    99
+                )
+
+                new_priority = priority.get(
+                    level["category"],
+                    99
+                )
+
+                if new_priority < old_priority:
+
+                    result[-1] = level
+
+    return result
 
 
 # =========================================================
@@ -1227,12 +1702,11 @@ def calculate_risk_engine(
 
     last = df_d.iloc[-1]
 
-    # =====================================================
-    # البيانات الأساسية
-    # =====================================================
-
     support = float(
-        last["support"]
+        last.get(
+            "previous_support",
+            last["support"]
+        )
     )
 
     resistance = float(
@@ -1256,144 +1730,6 @@ def calculate_risk_engine(
     ):
 
         atr_val = entry * 0.03
-
-    # =====================================================
-    # Fibonacci Extensions
-    # =====================================================
-
-    fib_ext_1272 = float(
-        last.get(
-            "fib_ext_1272",
-            np.nan
-        )
-    )
-
-    fib_ext_1618 = float(
-        last.get(
-            "fib_ext_1618",
-            np.nan
-        )
-    )
-
-    fib_ext_2000 = float(
-        last.get(
-            "fib_ext_2000",
-            np.nan
-        )
-    )
-
-    # =====================================================
-    # Daily Resistance
-    # =====================================================
-
-    daily_levels = []
-
-    for level in [
-        previous_resistance,
-        resistance
-    ]:
-
-        if (
-            np.isfinite(level) and
-            level > entry
-        ):
-
-            daily_levels.append(
-                float(level)
-            )
-
-    # =====================================================
-    # Weekly Resistance
-    # =====================================================
-
-    weekly_levels = []
-
-    if (
-        df_w is not None and
-        not df_w.empty
-    ):
-
-        try:
-
-            w_high = (
-                df_w["High"]
-                .rolling(
-                    20,
-                    min_periods=10
-                )
-                .max()
-                .shift(1)
-                .iloc[-1]
-            )
-
-            if (
-                np.isfinite(w_high) and
-                w_high > entry
-            ):
-
-                weekly_levels.append(
-                    float(w_high)
-                )
-
-        except Exception:
-            pass
-
-    # =====================================================
-    # Monthly Resistance
-    # =====================================================
-
-    monthly_levels = []
-
-    if (
-        df_m is not None and
-        not df_m.empty
-    ):
-
-        try:
-
-            m_high = (
-                df_m["High"]
-                .rolling(
-                    12,
-                    min_periods=6
-                )
-                .max()
-                .shift(1)
-                .iloc[-1]
-            )
-
-            if (
-                np.isfinite(m_high) and
-                m_high > entry
-            ):
-
-                monthly_levels.append(
-                    float(m_high)
-                )
-
-        except Exception:
-            pass
-
-    # =====================================================
-    # Fibonacci Extension Levels
-    # =====================================================
-
-    fib_levels = []
-
-    for level in [
-        fib_ext_1272,
-        fib_ext_1618,
-        fib_ext_2000
-    ]:
-
-        if (
-            np.isfinite(level) and
-            level > entry
-        ):
-
-            fib_levels.append(
-                float(level)
-            )
 
     # =====================================================
     # اتجاه السهم
@@ -1426,63 +1762,50 @@ def calculate_risk_engine(
         )
     )
 
-    strong_volume = (
-        volume_ratio >= 1.5
-    )
-
     # =====================================================
     # Stop Loss
     # =====================================================
 
-    if bullish:
-
-        atr_stop = (
-            entry -
-            atr_val * 1.5
+    atr_stop = (
+        entry -
+        atr_val * (
+            1.5 if bullish else 1.2
         )
+    )
 
-        support_stop = (
-            support -
-            atr_val * 0.25
-        )
+    support_stop = (
+        support -
+        atr_val * 0.25
+    )
 
-        candidates = [
-            x for x in [
-                atr_stop,
-                support_stop
-            ]
-            if (
-                np.isfinite(x) and
-                x > 0 and
-                x < entry
-            )
+    candidates = [
+        x for x in [
+            atr_stop,
+            support_stop
         ]
+        if (
+            np.isfinite(x) and
+            x > 0 and
+            x < entry
+        )
+    ]
 
-        if candidates:
+    if candidates:
 
-            stop = max(
-                candidates
-            )
-
-        else:
-
-            stop = (
-                entry -
-                atr_val * 1.5
-            )
+        stop = max(
+            candidates
+        )
 
     else:
 
         stop = (
             entry -
-            atr_val * 1.2
+            atr_val * 1.5
         )
 
-        if stop <= 0:
+    if stop <= 0:
 
-            stop = (
-                entry * 0.95
-            )
+        stop = entry * 0.95
 
     # =====================================================
     # Risk %
@@ -1533,96 +1856,260 @@ def calculate_risk_engine(
     )
 
     # =====================================================
-    # Professional Target Engine
+    # TARGET LEVELS
+    #
+    # الأولوية:
+    # 1 Resistance
+    # 2 Swing High
+    # 3 Weekly / Monthly
+    # 4 Fibonacci
+    # 5 ATR
     # =====================================================
 
-    atr_distance = atr_val
+    structural_levels = []
+
+    # -----------------------------------------------------
+    # 1. Daily Resistance
+    # -----------------------------------------------------
+
+    add_target_level(
+        structural_levels,
+        previous_resistance,
+        "المقاومة اليومية السابقة",
+        "Resistance"
+    )
+
+    add_target_level(
+        structural_levels,
+        resistance,
+        "المقاومة اليومية الحالية",
+        "Resistance"
+    )
+
+    # -----------------------------------------------------
+    # 2. Swing High
+    # -----------------------------------------------------
+
+    add_target_level(
+        structural_levels,
+        last.get(
+            "swing_high_20",
+            np.nan
+        ),
+        "آخر Swing High - 20 شمعة",
+        "Swing High"
+    )
+
+    add_target_level(
+        structural_levels,
+        last.get(
+            "swing_high_60",
+            np.nan
+        ),
+        "آخر Swing High - 60 شمعة",
+        "Swing High"
+    )
+
+    # -----------------------------------------------------
+    # 3. Weekly Levels
+    # -----------------------------------------------------
+
+    weekly_levels = []
+
+    if (
+        df_w is not None and
+        not df_w.empty
+    ):
+
+        try:
+
+            w_previous_high = (
+                df_w["High"]
+                .rolling(
+                    20,
+                    min_periods=10
+                )
+                .max()
+                .shift(1)
+                .iloc[-1]
+            )
+
+            if (
+                np.isfinite(w_previous_high) and
+                w_previous_high > entry
+            ):
+
+                weekly_levels.append(
+                    float(w_previous_high)
+                )
+
+                add_target_level(
+                    structural_levels,
+                    w_previous_high,
+                    "مقاومة Weekly سابقة",
+                    "Weekly"
+                )
+
+        except Exception:
+            pass
+
+    # -----------------------------------------------------
+    # 4. Monthly Levels
+    # -----------------------------------------------------
+
+    monthly_levels = []
+
+    if (
+        df_m is not None and
+        not df_m.empty
+    ):
+
+        try:
+
+            m_previous_high = (
+                df_m["High"]
+                .rolling(
+                    12,
+                    min_periods=6
+                )
+                .max()
+                .shift(1)
+                .iloc[-1]
+            )
+
+            if (
+                np.isfinite(m_previous_high) and
+                m_previous_high > entry
+            ):
+
+                monthly_levels.append(
+                    float(m_previous_high)
+                )
+
+                add_target_level(
+                    structural_levels,
+                    m_previous_high,
+                    "مقاومة Monthly سابقة",
+                    "Monthly"
+                )
+
+        except Exception:
+            pass
+
+    # -----------------------------------------------------
+    # 5. Fibonacci
+    # -----------------------------------------------------
+
+    fib_levels = [
+        (
+            last.get(
+                "fib_ext_1272",
+                np.nan
+            ),
+            "Fibonacci Extension 127.2%"
+        ),
+        (
+            last.get(
+                "fib_ext_1618",
+                np.nan
+            ),
+            "Fibonacci Extension 161.8%"
+        ),
+        (
+            last.get(
+                "fib_ext_2000",
+                np.nan
+            ),
+            "Fibonacci Extension 200%"
+        )
+    ]
+
+    for level, reason in fib_levels:
+
+        if (
+            np.isfinite(level) and
+            level > entry
+        ):
+
+            add_target_level(
+                structural_levels,
+                level,
+                reason,
+                "Fibonacci"
+            )
 
     # =====================================================
-    # بناء المستويات المحتملة
+    # تنظيف المستويات الهيكلية
     # =====================================================
 
-    all_levels = []
+    structural_levels = [
+        x for x in structural_levels
+        if (
+            np.isfinite(x["price"]) and
+            x["price"] > entry
+        )
+    ]
 
-    all_levels.extend(
-        daily_levels
-    )
-
-    all_levels.extend(
-        weekly_levels
-    )
-
-    all_levels.extend(
-        monthly_levels
-    )
-
-    all_levels.extend(
-        fib_levels
+    structural_levels = deduplicate_levels(
+        structural_levels,
+        tolerance=0.008
     )
 
     # =====================================================
     # ATR Targets
     # =====================================================
 
-    atr_target_1 = (
-        entry +
-        atr_distance * 1.5
-    )
-
-    atr_target_2 = (
-        entry +
-        atr_distance * 2.8
-    )
-
-    atr_target_3 = (
-        entry +
-        atr_distance * 4.5
-    )
-
-    atr_target_4 = (
-        entry +
-        atr_distance * 6.5
-    )
-
-    all_levels.extend([
-        atr_target_1,
-        atr_target_2,
-        atr_target_3,
-        atr_target_4
-    ])
-
-    # =====================================================
-    # تنظيف المستويات
-    # =====================================================
-
-    clean_levels = []
-
-    for level in all_levels:
-
-        try:
-
-            level = float(level)
-
-            if (
-                np.isfinite(level) and
-                level > entry
-            ):
-
-                clean_levels.append(
-                    level
-                )
-
-        except Exception:
-            continue
-
-    clean_levels = sorted(
-        set(
-            round(
-                x,
-                6
-            )
-            for x in clean_levels
+    atr_targets = [
+        (
+            entry + atr_val * 1.5,
+            "ATR 1.5"
+        ),
+        (
+            entry + atr_val * 2.8,
+            "ATR 2.8"
+        ),
+        (
+            entry + atr_val * 4.5,
+            "ATR 4.5"
+        ),
+        (
+            entry + atr_val * 6.5,
+            "ATR 6.5"
         )
+    ]
+
+    # =====================================================
+    # دمج المستويات
+    # =====================================================
+
+    all_levels = []
+
+    all_levels.extend(
+        structural_levels
+    )
+
+    for price, reason in atr_targets:
+
+        add_target_level(
+            all_levels,
+            price,
+            reason,
+            "ATR"
+        )
+
+    all_levels = [
+        x for x in all_levels
+        if x["price"] > entry
+    ]
+
+    all_levels = deduplicate_levels(
+        all_levels,
+        tolerance=0.01
+    )
+
+    all_levels = sorted(
+        all_levels,
+        key=lambda x: x["price"]
     )
 
     # =====================================================
@@ -1635,185 +2122,198 @@ def calculate_risk_engine(
     )
 
     # =====================================================
-    # TP1
+    # أقصى مسافة منطقية
     # =====================================================
 
-    tp1_candidates = [
-        x for x in clean_levels
-        if x >= (
-            entry +
-            atr_val * 1.15
-        )
-    ]
-
-    if tp1_candidates:
-
-        tp1 = min(
-            tp1_candidates
-        )
-
-    else:
-
-        tp1 = atr_target_1
+    max_reasonable = (
+        entry +
+        atr_val * 10
+    )
 
     # =====================================================
-    # TP2
+    # اختيار الأهداف
+    #
+    # الهدف الأقرب المنطقي أولاً،
+    # ثم المستوى الهيكلي التالي،
+    # ثم ATR كحل احتياطي.
     # =====================================================
 
-    tp2_candidates = [
-        x for x in clean_levels
-        if x >= (
-            tp1 +
-            min_gap
-        )
-    ]
+    selected = []
 
-    if tp2_candidates:
+    def choose_next(
+        minimum_price,
+        preferred_categories=None
+    ):
 
-        structural_tp2 = [
-            x for x in tp2_candidates
-            if x in (
-                daily_levels +
-                weekly_levels +
-                monthly_levels +
-                fib_levels
+        candidates = [
+            x for x in all_levels
+            if (
+                x["price"] >= minimum_price and
+                x["price"] <= max_reasonable
             )
         ]
 
-        if structural_tp2:
+        if preferred_categories:
 
-            tp2 = min(
-                structural_tp2
+            preferred = [
+                x for x in candidates
+                if x["category"] in preferred_categories
+            ]
+
+            if preferred:
+                return min(
+                    preferred,
+                    key=lambda x: x["price"]
+                )
+
+        if candidates:
+
+            return min(
+                candidates,
+                key=lambda x: x["price"]
             )
 
-        else:
+        return None
 
-            tp2 = min(
-                tp2_candidates
-            )
+    # =====================================================
+    # TP1
+    #
+    # أولوية للمقاومة القريبة / Swing
+    # =====================================================
 
-    else:
+    tp1_level = choose_next(
+        entry + atr_val * 1.0,
+        [
+            "Resistance",
+            "Swing High",
+            "Weekly"
+        ]
+    )
 
-        tp2 = max(
-            tp1 + min_gap,
-            atr_target_2
-        )
+    if tp1_level is None:
+
+        tp1_level = {
+            "price": entry + atr_val * 1.5,
+            "reason": "ATR 1.5 كحل احتياطي",
+            "category": "ATR"
+        }
+
+    selected.append(
+        tp1_level
+    )
+
+    # =====================================================
+    # TP2
+    #
+    # يفضل Weekly / Monthly / Fibonacci
+    # =====================================================
+
+    tp2_level = choose_next(
+        selected[-1]["price"] + min_gap,
+        [
+            "Weekly",
+            "Monthly",
+            "Swing High",
+            "Fibonacci"
+        ]
+    )
+
+    if tp2_level is None:
+
+        tp2_level = {
+            "price": max(
+                selected[-1]["price"] + min_gap,
+                entry + atr_val * 2.8
+            ),
+            "reason": "ATR 2.8 كحل احتياطي",
+            "category": "ATR"
+        }
+
+    selected.append(
+        tp2_level
+    )
 
     # =====================================================
     # TP3
     # =====================================================
 
-    tp3_candidates = [
-        x for x in clean_levels
-        if x >= (
-            tp2 +
-            min_gap
-        )
-    ]
-
-    if tp3_candidates:
-
-        structural_tp3 = [
-            x for x in tp3_candidates
-            if x in (
-                weekly_levels +
-                monthly_levels +
-                fib_levels
-            )
+    tp3_level = choose_next(
+        selected[-1]["price"] + min_gap,
+        [
+            "Monthly",
+            "Fibonacci",
+            "Swing High"
         ]
+    )
 
-        if structural_tp3:
+    if tp3_level is None:
 
-            tp3 = min(
-                structural_tp3
-            )
+        tp3_level = {
+            "price": max(
+                selected[-1]["price"] + min_gap,
+                entry + atr_val * 4.5
+            ),
+            "reason": "ATR 4.5 كحل احتياطي",
+            "category": "ATR"
+        }
 
-        else:
-
-            tp3 = min(
-                tp3_candidates
-            )
-
-    else:
-
-        tp3 = max(
-            tp2 + min_gap,
-            atr_target_3
-        )
+    selected.append(
+        tp3_level
+    )
 
     # =====================================================
     # TP4
     # =====================================================
 
-    tp4_candidates = [
-        x for x in clean_levels
-        if x >= (
-            tp3 +
-            min_gap
-        )
-    ]
-
-    if tp4_candidates:
-
-        structural_tp4 = [
-            x for x in tp4_candidates
-            if x in (
-                monthly_levels +
-                fib_levels
-            )
+    tp4_level = choose_next(
+        selected[-1]["price"] + min_gap,
+        [
+            "Monthly",
+            "Fibonacci"
         ]
+    )
 
-        if structural_tp4:
+    if tp4_level is None:
 
-            tp4 = max(
-                structural_tp4
-            )
+        tp4_level = {
+            "price": max(
+                selected[-1]["price"] + min_gap,
+                entry + atr_val * 6.5
+            ),
+            "reason": "ATR 6.5 كحل احتياطي",
+            "category": "ATR"
+        }
 
-        else:
-
-            tp4 = max(
-                tp4_candidates
-            )
-
-    else:
-
-        tp4 = max(
-            tp3 + min_gap,
-            atr_target_4
-        )
+    selected.append(
+        tp4_level
+    )
 
     # =====================================================
-    # فلتر قوة الاتجاه
-    # =====================================================
-
-    if not strong_trend:
-
-        tp4 = min(
-            tp4,
-            entry +
-            atr_val * 6.0
-        )
-
-    # =====================================================
-    # اتجاه قوي + Breakout + Volume
+    # اتجاه قوي + Breakout
     # =====================================================
 
     if (
         strong_trend and
         breakout and
-        strong_volume
+        volume_ratio >= 1.5
     ):
 
-        tp3 = max(
-            tp3,
-            entry +
-            atr_val * 4.5
+        selected[2]["price"] = max(
+            selected[2]["price"],
+            entry + atr_val * 4.5
         )
 
-        tp4 = max(
-            tp4,
-            entry +
-            atr_val * 7.0
+        selected[2]["reason"] += (
+            " + تعزيز بسبب Breakout قوي"
+        )
+
+        selected[3]["price"] = max(
+            selected[3]["price"],
+            entry + atr_val * 7.0
+        )
+
+        selected[3]["reason"] += (
+            " + تعزيز بسبب الاتجاه القوي"
         )
 
     # =====================================================
@@ -1825,140 +2325,188 @@ def calculate_risk_engine(
         volume_ratio >= 1.5
     ):
 
-        tp4 = max(
-            tp4,
-            entry +
-            atr_val * 8.0
+        selected[3]["price"] = max(
+            selected[3]["price"],
+            entry + atr_val * 8.0
+        )
+
+        selected[3]["reason"] += (
+            " + اتجاه قوي جدًا"
         )
 
     # =====================================================
-    # FINAL TARGET ORDER VALIDATION
+    # فلتر الاتجاه
     # =====================================================
 
-    tp1 = max(
-        tp1,
-        entry +
-        atr_val * 1.0
+    if not strong_trend:
+
+        selected[3]["price"] = min(
+            selected[3]["price"],
+            entry + atr_val * 6.0
+        )
+
+        selected[3]["reason"] += (
+            " + تم تحديده بسبب قوة الاتجاه المحدودة"
+        )
+
+    # =====================================================
+    # FINAL ORDER VALIDATION
+    # =====================================================
+
+    prices = [
+        float(x["price"])
+        for x in selected
+    ]
+
+    # إجبار الترتيب
+    prices[0] = max(
+        prices[0],
+        entry + atr_val * 1.0
     )
 
-    tp2 = max(
-        tp2,
-        tp1 +
-        min_gap
+    prices[1] = max(
+        prices[1],
+        prices[0] + min_gap
     )
 
-    tp3 = max(
-        tp3,
-        tp2 +
-        min_gap
+    prices[2] = max(
+        prices[2],
+        prices[1] + min_gap
     )
 
-    tp4 = max(
-        tp4,
-        tp3 +
-        min_gap
+    prices[3] = max(
+        prices[3],
+        prices[2] + min_gap
     )
 
     # =====================================================
-    # منع الأهداف المبالغ فيها
+    # منع TP4 من تجاوز الحد المعقول
     # =====================================================
 
-    max_reasonable = (
-        entry +
-        atr_val * 10
-    )
-
-    tp4 = min(
-        tp4,
+    prices[3] = min(
+        prices[3],
         max_reasonable
     )
 
-    # إعادة ضمان الترتيب
-    tp3 = min(
-        tp3,
-        tp4 - min_gap
+    # إعادة ضبط عكسي
+    prices[2] = min(
+        prices[2],
+        prices[3] - min_gap
     )
 
-    tp2 = min(
-        tp2,
-        tp3 - min_gap
+    prices[1] = min(
+        prices[1],
+        prices[2] - min_gap
     )
 
-    tp1 = min(
-        tp1,
-        tp2 - min_gap
+    prices[0] = min(
+        prices[0],
+        prices[1] - min_gap
     )
+
+    # ضمان الحد الأدنى مرة أخرى
+    prices[0] = max(
+        prices[0],
+        entry + atr_val
+    )
+
+    prices[1] = max(
+        prices[1],
+        prices[0] + min_gap
+    )
+
+    prices[2] = max(
+        prices[2],
+        prices[1] + min_gap
+    )
+
+    prices[3] = max(
+        prices[3],
+        prices[2] + min_gap
+    )
+
+    # =====================================================
+    # أسباب الأهداف
+    # =====================================================
+
+    target_reasons = [
+        selected[0]["reason"],
+        selected[1]["reason"],
+        selected[2]["reason"],
+        selected[3]["reason"]
+    ]
+
+    target_categories = [
+        selected[0]["category"],
+        selected[1]["category"],
+        selected[2]["category"],
+        selected[3]["category"]
+    ]
 
     # =====================================================
     # الأرباح %
     # =====================================================
 
-    tp1_profit_pct = (
+    profits = [
         (
-            tp1 -
+            price -
             entry
         ) /
-        entry
-    ) * 100
-
-    tp2_profit_pct = (
-        (
-            tp2 -
-            entry
-        ) /
-        entry
-    ) * 100
-
-    tp3_profit_pct = (
-        (
-            tp3 -
-            entry
-        ) /
-        entry
-    ) * 100
-
-    tp4_profit_pct = (
-        (
-            tp4 -
-            entry
-        ) /
-        entry
-    ) * 100
+        entry *
+        100
+        for price in prices
+    ]
 
     # =====================================================
     # Risk / Reward
     # =====================================================
 
-    rr1 = (
-        tp1 -
-        entry
-    ) / (
-        risk_per_share +
-        1e-9
+    rr = [
+        (
+            price -
+            entry
+        ) /
+        (
+            risk_per_share +
+            1e-9
+        )
+        for price in prices
+    ]
+
+    # =====================================================
+    # Target Quality Score
+    # =====================================================
+
+    category_points = {
+        "Resistance": 1.00,
+        "Swing High": 0.95,
+        "Weekly": 0.90,
+        "Monthly": 0.90,
+        "Fibonacci": 0.80,
+        "ATR": 0.65
+    }
+
+    quality_values = [
+        category_points.get(
+            category,
+            0.60
+        )
+        for category in target_categories
+    ]
+
+    target_quality = (
+        np.mean(
+            quality_values
+        ) * 100
     )
 
-    rr2 = (
-        tp2 -
-        entry
-    ) / (
-        risk_per_share +
-        1e-9
-    )
+    # تعزيز إذا كانت الأهداف الأولى هيكلية
+    if target_categories[0] != "ATR":
+        target_quality += 5
 
-    rr3 = (
-        tp3 -
-        entry
-    ) / (
-        risk_per_share +
-        1e-9
-    )
-
-    rr4 = (
-        tp4 -
-        entry
-    ) / (
-        risk_per_share +
-        1e-9
+    target_quality = min(
+        100,
+        target_quality
     )
 
     return {
@@ -1967,41 +2515,38 @@ def calculate_risk_engine(
 
         "stop": float(stop),
 
-        "tp1": float(tp1),
+        "tp1": float(prices[0]),
+        "tp2": float(prices[1]),
+        "tp3": float(prices[2]),
+        "tp4": float(prices[3]),
 
-        "tp2": float(tp2),
+        "tp1_profit_pct": float(profits[0]),
+        "tp2_profit_pct": float(profits[1]),
+        "tp3_profit_pct": float(profits[2]),
+        "tp4_profit_pct": float(profits[3]),
 
-        "tp3": float(tp3),
+        "tp1_reason": target_reasons[0],
+        "tp2_reason": target_reasons[1],
+        "tp3_reason": target_reasons[2],
+        "tp4_reason": target_reasons[3],
 
-        "tp4": float(tp4),
+        "tp1_category": target_categories[0],
+        "tp2_category": target_categories[1],
+        "tp3_category": target_categories[2],
+        "tp4_category": target_categories[3],
 
-        "tp1_profit_pct": float(
-            tp1_profit_pct
-        ),
+        "rr1": float(rr[0]),
+        "rr2": float(rr[1]),
+        "rr3": float(rr[2]),
+        "rr4": float(rr[3]),
 
-        "tp2_profit_pct": float(
-            tp2_profit_pct
-        ),
-
-        "tp3_profit_pct": float(
-            tp3_profit_pct
-        ),
-
-        "tp4_profit_pct": float(
-            tp4_profit_pct
+        "target_quality": float(
+            target_quality
         ),
 
         "risk_pct": float(
             risk_pct_actual * 100
         ),
-
-        "rr1": float(rr1),
-
-        "rr2": float(rr2),
-
-        "rr3": float(rr3),
-
-        "rr4": float(rr4),
 
         "position_size": float(
             position_size
@@ -2026,45 +2571,65 @@ def ai_confidence(
 ):
 
     score = 0
-    total = 10
+    total = 13
 
-    # Daily trend
-    if last_d["Close"] > last_d["ema200"]:
+    if (
+        np.isfinite(last_d.get("ema200", np.nan)) and
+        last_d["Close"] > last_d["ema200"]
+    ):
         score += 1
 
-    # Weekly trend
-    if last_w["Close"] > last_w["ema200"]:
+    if (
+        np.isfinite(last_w.get("ema200", np.nan)) and
+        last_w["Close"] > last_w["ema200"]
+    ):
         score += 1
 
-    # Monthly trend
-    if last_m["Close"] > last_m["ema200"]:
+    if (
+        np.isfinite(last_m.get("ema200", np.nan)) and
+        last_m["Close"] > last_m["ema200"]
+    ):
         score += 1
 
-    # MACD
     if last_d["macd"] > last_d["macd_signal"]:
         score += 1
 
-    # RSI healthy
     if 45 < last_d["rsi"] < 70:
         score += 1
 
-    # Volume
     if last_d["volume_ratio"] > 1:
         score += 1
 
-    # ADX
     if last_d["adx"] > 20:
         score += 1
 
-    # MFI
     if 40 < last_d["mfi"] < 80:
         score += 1
 
-    # Trend Alignment
+    if (
+        np.isfinite(last_d["obv"]) and
+        np.isfinite(last_d["obv_ma"]) and
+        last_d["obv"] > last_d["obv_ma"]
+    ):
+        score += 1
+
+    if (
+        np.isfinite(last_d["stoch_rsi_k"]) and
+        np.isfinite(last_d["stoch_rsi_d"]) and
+        last_d["stoch_rsi_k"] >
+        last_d["stoch_rsi_d"]
+    ):
+        score += 1
+
+    if (
+        np.isfinite(last_d["vwap"]) and
+        last_d["Close"] > last_d["vwap"]
+    ):
+        score += 1
+
     if alignment >= 60:
         score += 1
 
-    # Data Quality
     if data_quality >= 90:
         score += 1
 
@@ -2104,18 +2669,12 @@ def estimate_probabilities(
         momentum_factor * 0.15
     )
 
-    # =====================================================
-    # TP1
-    # =====================================================
-
     tp1 = base
 
     if rr1 >= 2:
-
         tp1 += 0.05
 
     elif rr1 < 1.2:
-
         tp1 -= 0.10
 
     tp1 = min(
@@ -2126,20 +2685,12 @@ def estimate_probabilities(
         )
     )
 
-    # =====================================================
-    # TP2
-    # =====================================================
-
-    tp2 = (
-        tp1 * 0.82
-    )
+    tp2 = tp1 * 0.82
 
     if rr2 >= 2:
-
         tp2 += 0.03
 
     elif rr2 < 1.5:
-
         tp2 -= 0.05
 
     tp2 = min(
@@ -2150,20 +2701,12 @@ def estimate_probabilities(
         )
     )
 
-    # =====================================================
-    # TP3
-    # =====================================================
-
-    tp3 = (
-        tp2 * 0.78
-    )
+    tp3 = tp2 * 0.78
 
     if rr3 >= 2.5:
-
         tp3 += 0.03
 
     elif rr3 < 2:
-
         tp3 -= 0.05
 
     tp3 = min(
@@ -2174,20 +2717,12 @@ def estimate_probabilities(
         )
     )
 
-    # =====================================================
-    # TP4
-    # =====================================================
-
-    tp4 = (
-        tp3 * 0.72
-    )
+    tp4 = tp3 * 0.72
 
     if rr4 >= 3:
-
         tp4 += 0.03
 
     elif rr4 < 2.5:
-
         tp4 -= 0.05
 
     tp4 = min(
@@ -2218,32 +2753,33 @@ def analyze(
     risk_percent
 ):
 
-    # =====================================================
-    # إضافة المؤشرات
-    # =====================================================
+    df_d = add_indicators(
+        df_d
+    )
 
-    df_d = add_indicators(df_d)
-    df_w = add_indicators(df_w)
-    df_m = add_indicators(df_m)
+    df_w = add_indicators(
+        df_w
+    )
+
+    df_m = add_indicators(
+        df_m
+    )
 
     # =====================================================
     # التأكد من البيانات
     # =====================================================
 
     if len(df_d) < MIN_DAILY_ROWS:
-
         raise ValueError(
             "بيانات يومية غير كافية"
         )
 
     if len(df_w) < MIN_WEEKLY_ROWS:
-
         raise ValueError(
             "بيانات أسبوعية غير كافية"
         )
 
     if len(df_m) < MIN_MONTHLY_ROWS:
-
         raise ValueError(
             "بيانات شهرية غير كافية"
         )
@@ -2275,23 +2811,35 @@ def analyze(
     # =====================================================
 
     required_daily = [
-        "ema200",
+        "ema20",
+        "ema50",
         "rsi",
         "macd",
         "macd_signal",
+        "macd_hist",
         "vol_ma",
         "volume_ratio",
+        "obv",
+        "obv_ma",
+        "obv_slope",
+        "mfi",
+        "stoch_rsi",
+        "stoch_rsi_k",
+        "stoch_rsi_d",
+        "stoch_rsi_k_slope",
+        "vwap",
         "support",
         "resistance",
+        "previous_support",
+        "previous_resistance",
         "atr",
         "adx",
-        "mfi",
         "ema20_slope",
-        "ema50_slope"
+        "ema50_slope",
+        "body_pct"
     ]
 
     required_tf = [
-        "ema200",
         "ema20",
         "ema50",
         "macd",
@@ -2300,6 +2848,8 @@ def analyze(
         "ema20_slope"
     ]
 
+    # EMA200 لا يدخل في required_tf
+    # لأننا نريد معرفة هل هو مكتمل أم لا
     df_d = df_d.dropna(
         subset=required_daily
     )
@@ -2335,10 +2885,35 @@ def analyze(
     )
 
     if market_price <= 0:
-
         raise ValueError(
             "سعر غير صحيح"
         )
+
+    # =====================================================
+    # EMA200 Quality
+    # =====================================================
+
+    daily_ema200_complete = (
+        len(df_d) >= EMA200_REQUIRED_ROWS
+    )
+
+    weekly_ema200_complete = (
+        len(df_w) >= EMA200_REQUIRED_ROWS
+    )
+
+    monthly_ema200_complete = (
+        len(df_m) >= EMA200_REQUIRED_ROWS
+    )
+
+    ema200_status = (
+        "✅ مكتمل"
+        if (
+            daily_ema200_complete and
+            weekly_ema200_complete and
+            monthly_ema200_complete
+        )
+        else "⚠️ غير مكتمل"
+    )
 
     # =====================================================
     # Trend Alignment
@@ -2364,7 +2939,7 @@ def analyze(
 
     entry_info = determine_entry(
         df_d,
-        market_price
+        alignment
     )
 
     entry = float(
@@ -2372,9 +2947,10 @@ def analyze(
     )
 
     entry_type = entry_info["type"]
+    entry_reason = entry_info["reason"]
 
     # =====================================================
-    # Risk Engine
+    # Risk / Target Engine
     # =====================================================
 
     risk = calculate_risk_engine(
@@ -2393,229 +2969,304 @@ def analyze(
     tp3 = risk["tp3"]
     tp4 = risk["tp4"]
 
-    tp1_profit_pct = risk[
-        "tp1_profit_pct"
-    ]
-
-    tp2_profit_pct = risk[
-        "tp2_profit_pct"
-    ]
-
-    tp3_profit_pct = risk[
-        "tp3_profit_pct"
-    ]
-
-    tp4_profit_pct = risk[
-        "tp4_profit_pct"
-    ]
-
-    rr1 = risk["rr1"]
-    rr2 = risk["rr2"]
-    rr3 = risk["rr3"]
-    rr4 = risk["rr4"]
-
-    volatility = (
-        float(last_d["atr"]) /
-        entry
-    )
-
     # =====================================================
-    # ⭐ SCORE من 100
+    # Score جديد من 100
+    #
+    # 25 Trend
+    # 15 Momentum
+    # 15 Volume / Money Flow
+    # 10 Trend Strength
+    # 10 Price Structure
+    # 10 Entry Quality
+    # 10 Target Quality
+    # 5 Risk
+    #
+    # TOTAL = 100
     # =====================================================
 
     score = 0.0
 
-    # -----------------------------------------------------
-    # Trend Alignment 30
-    # -----------------------------------------------------
+    # =====================================================
+    # 1. Trend Quality = 25
+    #
+    # لا نكرر EMA20/50/200 بشكل زائد
+    # =====================================================
 
-    score += (
-        alignment *
-        0.30
+    trend_component = (
+        alignment * 0.25
     )
 
-    # -----------------------------------------------------
-    # RSI 10
-    # -----------------------------------------------------
+    score += trend_component
+
+    # =====================================================
+    # 2. Momentum = 15
+    # =====================================================
 
     rsi = float(
         last_d["rsi"]
     )
 
-    if 50 <= rsi <= 65:
+    momentum_score = 0
 
-        score += 10
+    if 50 <= rsi <= 65:
+        momentum_score += 7
 
     elif 45 <= rsi < 50:
-
-        score += 7
+        momentum_score += 5
 
     elif 65 < rsi <= 70:
-
-        score += 7
+        momentum_score += 5
 
     elif 35 <= rsi < 45:
-
-        score += 4
-
-    # -----------------------------------------------------
-    # MACD 10
-    # -----------------------------------------------------
+        momentum_score += 2
 
     if (
         last_d["macd"] >
         last_d["macd_signal"]
     ):
+        momentum_score += 5
 
-        score += 10
+    elif last_d["macd_hist"] > 0:
+        momentum_score += 3
 
-    elif (
-        last_d["macd_hist"] >
-        0
-    ):
+    stoch_k = float(
+        last_d["stoch_rsi_k"]
+    )
 
-        score += 6
+    stoch_d = float(
+        last_d["stoch_rsi_d"]
+    )
 
-    # -----------------------------------------------------
-    # Volume 10
-    # -----------------------------------------------------
+    if stoch_k > stoch_d:
+        momentum_score += 3
+
+    score += min(
+        15,
+        momentum_score
+    )
+
+    # =====================================================
+    # 3. Volume / Money Flow = 15
+    # =====================================================
 
     volume_ratio = float(
         last_d["volume_ratio"]
     )
 
-    if volume_ratio >= 2:
+    money_score = 0
 
-        score += 10
+    if volume_ratio >= 2:
+        money_score += 5
 
     elif volume_ratio >= 1.5:
-
-        score += 8
+        money_score += 4
 
     elif volume_ratio >= 1.1:
-
-        score += 6
+        money_score += 3
 
     elif volume_ratio >= 0.8:
-
-        score += 3
-
-    # -----------------------------------------------------
-    # ADX 10
-    # -----------------------------------------------------
-
-    adx_val = float(
-        last_d["adx"]
-    )
-
-    if adx_val >= 30:
-
-        score += 10
-
-    elif adx_val >= 25:
-
-        score += 8
-
-    elif adx_val >= 20:
-
-        score += 6
-
-    elif adx_val >= 15:
-
-        score += 3
-
-    # -----------------------------------------------------
-    # MFI 5
-    # -----------------------------------------------------
+        money_score += 1
 
     mfi = float(
         last_d["mfi"]
     )
 
     if 50 <= mfi <= 75:
-
-        score += 5
+        money_score += 4
 
     elif 40 <= mfi < 50:
-
-        score += 3
+        money_score += 2
 
     elif 75 < mfi <= 85:
+        money_score += 2
 
-        score += 3
+    obv = float(
+        last_d["obv"]
+    )
 
-    # -----------------------------------------------------
-    # Trend Slope 5
-    # -----------------------------------------------------
+    obv_ma = float(
+        last_d["obv_ma"]
+    )
+
+    obv_slope = float(
+        last_d["obv_slope"]
+    )
+
+    if (
+        obv > obv_ma and
+        obv_slope > 0
+    ):
+        money_score += 6
+
+    elif (
+        obv > obv_ma or
+        obv_slope > 0
+    ):
+        money_score += 4
+
+    elif obv_slope > 0:
+        money_score += 2
+
+    score += min(
+        15,
+        money_score
+    )
+
+    # =====================================================
+    # 4. Trend Strength = 10
+    # =====================================================
+
+    adx_val = float(
+        last_d["adx"]
+    )
+
+    strength_score = 0
+
+    if adx_val >= 30:
+        strength_score = 10
+
+    elif adx_val >= 25:
+        strength_score = 8
+
+    elif adx_val >= 20:
+        strength_score = 6
+
+    elif adx_val >= 15:
+        strength_score = 3
+
+    score += strength_score
+
+    # =====================================================
+    # 5. Price Structure = 10
+    # =====================================================
+
+    structure_score = 0
 
     if (
         last_d["ema20_slope"] > 0 and
         last_d["ema50_slope"] > 0
     ):
+        structure_score += 4
 
-        score += 5
+    elif last_d["ema20_slope"] > 0:
+        structure_score += 2
 
-    elif (
-        last_d["ema20_slope"] > 0
+    if (
+        last_d["Close"] >
+        last_d["vwap"]
     ):
+        structure_score += 3
 
-        score += 3
+    if (
+        last_d["Close"] >
+        last_d["ema50"]
+    ):
+        structure_score += 3
 
-    # -----------------------------------------------------
-    # Entry Quality 10
-    # -----------------------------------------------------
+    score += min(
+        10,
+        structure_score
+    )
 
-    if entry_type == "دخول فوري":
+    # =====================================================
+    # 6. Entry Quality = 10
+    # =====================================================
 
-        score += 7
+    entry_score = 0
 
-    elif entry_type == "دخول عند Pullback":
-
-        score += 10
+    if entry_type == "دخول عند Pullback":
+        entry_score = 10
 
     elif entry_type == "دخول اختراق":
+        entry_score = 9
 
-        score += 9
+    elif entry_type == "دخول فوري":
+        entry_score = 7
 
     else:
+        entry_score = 2
 
-        score += 3
+    score += entry_score
 
-    # -----------------------------------------------------
-    # Risk / Reward 10
-    # -----------------------------------------------------
+    # =====================================================
+    # 7. Target Quality = 10
+    # =====================================================
+
+    target_quality = float(
+        risk["target_quality"]
+    )
+
+    target_component = (
+        target_quality *
+        0.10
+    )
+
+    score += target_component
+
+    # =====================================================
+    # 8. Risk Quality = 5
+    # =====================================================
+
+    rr1 = float(
+        risk["rr1"]
+    )
+
+    risk_pct_actual = float(
+        risk["risk_pct"]
+    )
+
+    risk_score = 0
 
     if rr1 >= 2:
-
-        score += 10
+        risk_score += 3
 
     elif rr1 >= 1.5:
-
-        score += 7
+        risk_score += 2
 
     elif rr1 >= 1.2:
+        risk_score += 1
 
-        score += 4
+    if risk_pct_actual <= 5:
+        risk_score += 2
 
-    # -----------------------------------------------------
-    # Data Quality adjustment
-    # -----------------------------------------------------
+    elif risk_pct_actual <= 8:
+        risk_score += 1
 
-    if data_quality >= 95:
+    score += min(
+        5,
+        risk_score
+    )
 
-        score += 5
+    # =====================================================
+    # EMA200 incomplete penalty
+    # =====================================================
 
-    elif data_quality >= 90:
+    incomplete_count = sum([
+        not daily_ema200_complete,
+        not weekly_ema200_complete,
+        not monthly_ema200_complete
+    ])
 
-        score += 3
+    if incomplete_count >= 2:
+        score -= 4
 
-    elif data_quality < 75:
+    elif incomplete_count == 1:
+        score -= 2
 
-        score -= 5
+    # =====================================================
+    # لا نعطي 85+ إذا كان Entry مجرد انتظار
+    # =====================================================
 
-    # -----------------------------------------------------
-    # الحد النهائي
-    # -----------------------------------------------------
+    if entry_type == "انتظار تأكيد":
+
+        score = min(
+            score,
+            69
+        )
+
+    # =====================================================
+    # Final Score
+    # =====================================================
 
     score = min(
         100,
@@ -2637,10 +3288,6 @@ def analyze(
         data_quality
     )
 
-    # =====================================================
-    # تقدير الثقة المحافظة
-    # =====================================================
-
     (
         tp1_prob,
         tp2_prob,
@@ -2648,10 +3295,10 @@ def analyze(
         tp4_prob
     ) = estimate_probabilities(
         base_conf,
-        rr1,
-        rr2,
-        rr3,
-        rr4,
+        risk["rr1"],
+        risk["rr2"],
+        risk["rr3"],
+        risk["rr4"],
         alignment,
         adx_val
     )
@@ -2663,14 +3310,16 @@ def analyze(
     if (
         score >= 85 and
         rr1 >= 1.5 and
-        alignment >= 65
+        alignment >= 65 and
+        entry_type != "انتظار تأكيد"
     ):
 
         signal = "🔥 قوي جداً"
 
     elif (
         score >= 70 and
-        rr1 >= 1.3
+        rr1 >= 1.3 and
+        entry_type != "انتظار تأكيد"
     ):
 
         signal = "🟢 قوي"
@@ -2687,20 +3336,21 @@ def analyze(
     # المدة المتوقعة
     # =====================================================
 
-    if volatility > 0.07:
+    volatility = (
+        float(last_d["atr"]) /
+        entry
+    )
 
+    if volatility > 0.07:
         time_est = "1 - 3 أسابيع"
 
     elif volatility > 0.04:
-
         time_est = "3 - 8 أسابيع"
 
     elif volatility > 0.02:
-
         time_est = "1 - 3 شهور"
 
     else:
-
         time_est = "2 - 4 شهور"
 
     # =====================================================
@@ -2717,6 +3367,10 @@ def analyze(
         "الإشارة": signal,
 
         "الاتجاه": regime,
+
+        "نوع الدخول": entry_type,
+
+        "سبب الدخول": entry_reason,
 
         "سعر الدخول": round(
             entry,
@@ -2748,45 +3402,104 @@ def analyze(
             2
         ),
 
+        "سبب الهدف الأول": risk[
+            "tp1_reason"
+        ],
+
+        "سبب الهدف الثاني": risk[
+            "tp2_reason"
+        ],
+
+        "سبب الهدف الثالث": risk[
+            "tp3_reason"
+        ],
+
+        "سبب الهدف الرابع": risk[
+            "tp4_reason"
+        ],
+
+        "نوع الهدف الأول": risk[
+            "tp1_category"
+        ],
+
+        "نوع الهدف الثاني": risk[
+            "tp2_category"
+        ],
+
+        "نوع الهدف الثالث": risk[
+            "tp3_category"
+        ],
+
+        "نوع الهدف الرابع": risk[
+            "tp4_category"
+        ],
+
         "ربح الهدف الأول %": round(
-            tp1_profit_pct,
+            risk["tp1_profit_pct"],
             2
         ),
 
         "ربح الهدف الثاني %": round(
-            tp2_profit_pct,
+            risk["tp2_profit_pct"],
             2
         ),
 
         "ربح الهدف الثالث %": round(
-            tp3_profit_pct,
+            risk["tp3_profit_pct"],
             2
         ),
 
         "ربح الهدف الرابع %": round(
-            tp4_profit_pct,
+            risk["tp4_profit_pct"],
             2
         ),
 
-        "احتمال الهدف الأول %": round(
+        "R/R الهدف الأول": round(
+            risk["rr1"],
+            2
+        ),
+
+        "R/R الهدف الثاني": round(
+            risk["rr2"],
+            2
+        ),
+
+        "R/R الهدف الثالث": round(
+            risk["rr3"],
+            2
+        ),
+
+        "R/R الهدف الرابع": round(
+            risk["rr4"],
+            2
+        ),
+
+        "ثقة الهدف الأول %": round(
             tp1_prob * 100,
             1
         ),
 
-        "احتمال الهدف الثاني %": round(
+        "ثقة الهدف الثاني %": round(
             tp2_prob * 100,
             1
         ),
 
-        "احتمال الهدف الثالث %": round(
+        "ثقة الهدف الثالث %": round(
             tp3_prob * 100,
             1
         ),
 
-        "احتمال الهدف الرابع %": round(
+        "ثقة الهدف الرابع %": round(
             tp4_prob * 100,
             1
         ),
+
+        "جودة الأهداف": round(
+            target_quality,
+            1
+        ),
+
+        "EMA200": ema200_status,
 
         "التذبذب ATR %": round(
             volatility * 100,
@@ -2806,8 +3519,7 @@ def analyze(
         "المدة المتوقعة": time_est,
 
         # =================================================
-        # معلومات داخلية للمحرك
-        # لا يتم عرضها في الجداول للحفاظ على شكلها
+        # معلومات داخلية
         # =================================================
 
         "_entry_type": entry_type,
@@ -2822,28 +3534,51 @@ def analyze(
             2
         ),
 
+        "_ema200_daily": (
+            "مكتمل"
+            if daily_ema200_complete
+            else "غير مكتمل"
+        ),
+
+        "_ema200_weekly": (
+            "مكتمل"
+            if weekly_ema200_complete
+            else "غير مكتمل"
+        ),
+
+        "_ema200_monthly": (
+            "مكتمل"
+            if monthly_ema200_complete
+            else "غير مكتمل"
+        ),
+
         "_risk_pct": round(
             risk["risk_pct"],
             2
         ),
 
         "_rr1": round(
-            rr1,
+            risk["rr1"],
             2
         ),
 
         "_rr2": round(
-            rr2,
+            risk["rr2"],
             2
         ),
 
         "_rr3": round(
-            rr3,
+            risk["rr3"],
             2
         ),
 
         "_rr4": round(
-            rr4,
+            risk["rr4"],
+            2
+        ),
+
+        "_target_quality": round(
+            target_quality,
             2
         ),
 
@@ -2854,6 +3589,46 @@ def analyze(
 
         "_position_value": round(
             risk["position_value"],
+            2
+        ),
+
+        "_obv": round(
+            obv,
+            2
+        ),
+
+        "_obv_ma": round(
+            obv_ma,
+            2
+        ),
+
+        "_stoch_rsi_k": round(
+            stoch_k,
+            4
+        ),
+
+        "_stoch_rsi_d": round(
+            stoch_d,
+            4
+        ),
+
+        "_vwap": round(
+            float(last_d["vwap"]),
+            4
+        ),
+
+        "_pullback_quality": round(
+            float(
+                last_d.get(
+                    "pullback_quality_score",
+                    0
+                )
+            ),
+            2
+        ),
+
+        "_volume_ratio": round(
+            volume_ratio,
             2
         )
     }
@@ -2879,10 +3654,6 @@ def process(
 
     try:
 
-        # =================================================
-        # استخراج البيانات
-        # =================================================
-
         df_d = extract_symbol_data(
             daily,
             symbol
@@ -2897,10 +3668,6 @@ def process(
             monthly,
             symbol
         )
-
-        # =================================================
-        # Validation
-        # =================================================
 
         if df_d.empty:
 
@@ -2944,10 +3711,6 @@ def process(
                 "الحالة": "❌ بيانات شهرية غير كافية"
             }
 
-        # =================================================
-        # التحليل
-        # =================================================
-
         result = analyze(
             df_d,
             df_w,
@@ -2957,7 +3720,6 @@ def process(
         )
 
         result["السهم"] = clean_symbol
-
         result["الحالة"] = "✅ تم التحليل"
 
         return result
@@ -2966,7 +3728,7 @@ def process(
 
         return {
             "السهم": clean_symbol,
-            "الحالة": f"❌ {str(e)[:80]}"
+            "الحالة": f"❌ {str(e)[:120]}"
         }
 
 
@@ -2979,10 +3741,6 @@ if st.button(
     use_container_width=True
 ):
 
-    # =====================================================
-    # الحالة
-    # =====================================================
-
     st.info(
         f"📡 جاري فحص {TOTAL_STOCKS} سهم..."
     )
@@ -2994,7 +3752,7 @@ if st.button(
     status_text = st.empty()
 
     # =====================================================
-    # 📥 البيانات اليومية
+    # Daily
     # =====================================================
 
     with st.spinner(
@@ -3012,7 +3770,7 @@ if st.button(
     )
 
     # =====================================================
-    # 📥 البيانات الأسبوعية
+    # Weekly
     # =====================================================
 
     status_text.info(
@@ -3030,7 +3788,7 @@ if st.button(
     )
 
     # =====================================================
-    # 📥 البيانات الشهرية
+    # Monthly
     # =====================================================
 
     status_text.info(
@@ -3048,7 +3806,7 @@ if st.button(
     )
 
     # =====================================================
-    # 📊 فحص Data Engine
+    # Data Engine Stats
     # =====================================================
 
     status_text.info(
@@ -3118,11 +3876,32 @@ if st.button(
                 round(
                     quality,
                     2
+                ),
+
+            "daily_ema200":
+                (
+                    "✅"
+                    if qd["rows"] >= 200
+                    else "⚠️"
+                ),
+
+            "weekly_ema200":
+                (
+                    "✅"
+                    if qw["rows"] >= 200
+                    else "⚠️"
+                ),
+
+            "monthly_ema200":
+                (
+                    "✅"
+                    if qm["rows"] >= 200
+                    else "⚠️"
                 )
         })
 
     # =====================================================
-    # 🧠 التحليل
+    # التحليل
     # =====================================================
 
     results = []
@@ -3161,7 +3940,6 @@ if st.button(
                 result = future.result()
 
                 if result:
-
                     results.append(
                         result
                     )
@@ -3181,7 +3959,7 @@ if st.button(
                         ),
 
                     "الحالة":
-                        f"❌ {str(e)[:80]}"
+                        f"❌ {str(e)[:120]}"
                 })
 
             completed += 1
@@ -3204,7 +3982,7 @@ if st.button(
     )
 
     # =====================================================
-    # 📊 النتائج
+    # النتائج
     # =====================================================
 
     if not results:
@@ -3220,16 +3998,16 @@ if st.button(
     )
 
     # =====================================================
-    # 📈 الأسهم التي تم تحليلها بنجاح
-    # إصلاح: تعريف df_ok قبل استخدامه
+    # الأسهم الناجحة
     # =====================================================
 
     df_ok = df_all[
-        df_all["الحالة"] == "✅ تم التحليل"
+        df_all["الحالة"] ==
+        "✅ تم التحليل"
     ].copy()
 
     # =====================================================
-    # 📊 التغطية
+    # التغطية
     # =====================================================
 
     total = TOTAL_STOCKS
@@ -3252,7 +4030,7 @@ if st.button(
     )
 
     # =====================================================
-    # 📊 Data Engine Quality
+    # Data Quality
     # =====================================================
 
     stats_df = pd.DataFrame(
@@ -3291,15 +4069,42 @@ if st.button(
             ).mean() * 100
         )
 
+        daily_ema200_coverage = float(
+            (
+                stats_df[
+                    "daily_rows"
+                ] >= 200
+            ).mean() * 100
+        )
+
+        weekly_ema200_coverage = float(
+            (
+                stats_df[
+                    "weekly_rows"
+                ] >= 200
+            ).mean() * 100
+        )
+
+        monthly_ema200_coverage = float(
+            (
+                stats_df[
+                    "monthly_rows"
+                ] >= 200
+            ).mean() * 100
+        )
+
     else:
 
         avg_quality = 0
         daily_coverage = 0
         weekly_coverage = 0
         monthly_coverage = 0
+        daily_ema200_coverage = 0
+        weekly_ema200_coverage = 0
+        monthly_ema200_coverage = 0
 
     # =====================================================
-    # 📊 مؤشرات عامة
+    # ملخص الفحص
     # =====================================================
 
     st.subheader(
@@ -3329,7 +4134,7 @@ if st.button(
     )
 
     # =====================================================
-    # 📡 Data Engine Quality
+    # جودة البيانات
     # =====================================================
 
     st.subheader(
@@ -3358,15 +4163,32 @@ if st.button(
         f"{monthly_coverage:.1f}%"
     )
 
+    st.subheader(
+        "📐 تغطية EMA200 الحقيقي"
+    )
+
+    e1, e2, e3 = st.columns(3)
+
+    e1.metric(
+        "Daily EMA200",
+        f"{daily_ema200_coverage:.1f}%"
+    )
+
+    e2.metric(
+        "Weekly EMA200",
+        f"{weekly_ema200_coverage:.1f}%"
+    )
+
+    e3.metric(
+        "Monthly EMA200",
+        f"{monthly_ema200_coverage:.1f}%"
+    )
+
     # =====================================================
-    # 📈 الأسهم الناجحة
+    # الأسهم الناجحة
     # =====================================================
 
     if not df_ok.empty:
-
-        # =================================================
-        # ترتيب حسب التقييم
-        # =================================================
 
         df_ok = df_ok.sort_values(
             "التقييم",
@@ -3374,7 +4196,7 @@ if st.button(
         )
 
         # =================================================
-        # 🏆 أفضل الأسهم
+        # أفضل الأسهم
         # =================================================
 
         st.subheader(
@@ -3385,63 +4207,54 @@ if st.button(
             top_n
         ).copy()
 
-        # =================================================
-        # كل الأعمدة القديمة + الأعمدة الجديدة
-        # =================================================
-
         preferred_cols = [
 
             "السهم",
-
             "التقييم",
-
             "الإشارة",
-
             "الاتجاه",
-
+            "نوع الدخول",
+            "سبب الدخول",
             "سعر الدخول",
-
             "وقف الخسارة",
 
             "الهدف الأول",
+            "ربح الهدف الأول %",
+            "R/R الهدف الأول",
+            "سبب الهدف الأول",
 
             "الهدف الثاني",
+            "ربح الهدف الثاني %",
+            "R/R الهدف الثاني",
+            "سبب الهدف الثاني",
 
             "الهدف الثالث",
+            "ربح الهدف الثالث %",
+            "R/R الهدف الثالث",
+            "سبب الهدف الثالث",
 
             "الهدف الرابع",
-
-            "ربح الهدف الأول %",
-
-            "ربح الهدف الثاني %",
-
-            "ربح الهدف الثالث %",
-
             "ربح الهدف الرابع %",
+            "R/R الهدف الرابع",
+            "سبب الهدف الرابع",
 
-            "احتمال الهدف الأول %",
+            "جودة الأهداف",
+            "EMA200",
 
-            "احتمال الهدف الثاني %",
-
-            "احتمال الهدف الثالث %",
-
-            "احتمال الهدف الرابع %",
+            "ثقة الهدف الأول %",
+            "ثقة الهدف الثاني %",
+            "ثقة الهدف الثالث %",
+            "ثقة الهدف الرابع %",
 
             "مؤشر RSI",
-
             "قوة الاتجاه ADX",
-
             "التذبذب ATR %",
-
             "المدة المتوقعة"
-
         ]
 
         existing_cols = [
-
             c for c in preferred_cols
             if c in top_df.columns
-
         ]
 
         top_df = top_df[
@@ -3455,7 +4268,7 @@ if st.button(
         )
 
         # =================================================
-        # 🔥 الأسهم القوية
+        # الأسهم القوية
         # =================================================
 
         strong = df_ok[
@@ -3485,7 +4298,7 @@ if st.button(
             )
 
         # =================================================
-        # 📋 جميع الأسهم المحللة
+        # جميع الأسهم
         # =================================================
 
         st.subheader(
@@ -3501,7 +4314,7 @@ if st.button(
         )
 
         # =================================================
-        # 💾 تحميل النتائج
+        # CSV
         # =================================================
 
         csv_ok = (
@@ -3519,13 +4332,13 @@ if st.button(
         st.download_button(
             "⬇️ تحميل نتائج الأسهم المحللة",
             csv_ok,
-            "EGX_AI_PRO_MAX_RESULTS_AR.csv",
+            "EGX_AI_PRO_MAX_V7_RESULTS_AR.csv",
             "text/csv",
             use_container_width=True
         )
 
         # =================================================
-        # 📊 تفاصيل المحرك الداخلي
+        # معلومات المحرك
         # =================================================
 
         with st.expander(
@@ -3533,17 +4346,39 @@ if st.button(
         ):
 
             internal_cols = [
+
                 "السهم",
+
                 "_entry_type",
                 "_trend_alignment",
                 "_data_quality",
+
+                "_ema200_daily",
+                "_ema200_weekly",
+                "_ema200_monthly",
+
                 "_risk_pct",
+
                 "_rr1",
                 "_rr2",
                 "_rr3",
                 "_rr4",
+
+                "_target_quality",
+
                 "_position_size",
-                "_position_value"
+                "_position_value",
+
+                "_pullback_quality",
+                "_volume_ratio",
+
+                "_obv",
+                "_obv_ma",
+
+                "_stoch_rsi_k",
+                "_stoch_rsi_d",
+
+                "_vwap"
             ]
 
             available_internal = [
@@ -3557,6 +4392,7 @@ if st.button(
                 ]
                 .rename(
                     columns={
+
                         "_entry_type":
                             "نوع الدخول",
 
@@ -3565,6 +4401,15 @@ if st.button(
 
                         "_data_quality":
                             "جودة البيانات",
+
+                        "_ema200_daily":
+                            "Daily EMA200",
+
+                        "_ema200_weekly":
+                            "Weekly EMA200",
+
+                        "_ema200_monthly":
+                            "Monthly EMA200",
 
                         "_risk_pct":
                             "المخاطرة %",
@@ -3581,11 +4426,35 @@ if st.button(
                         "_rr4":
                             "R/R TP4",
 
+                        "_target_quality":
+                            "جودة الأهداف",
+
                         "_position_size":
                             "حجم المركز",
 
                         "_position_value":
-                            "قيمة المركز"
+                            "قيمة المركز",
+
+                        "_pullback_quality":
+                            "Pullback Quality",
+
+                        "_volume_ratio":
+                            "Volume Ratio",
+
+                        "_obv":
+                            "OBV",
+
+                        "_obv_ma":
+                            "OBV MA",
+
+                        "_stoch_rsi_k":
+                            "Stoch RSI K",
+
+                        "_stoch_rsi_d":
+                            "Stoch RSI D",
+
+                        "_vwap":
+                            "VWAP"
                     }
                 )
             )
@@ -3597,7 +4466,100 @@ if st.button(
             )
 
         # =================================================
-        # 📡 Data Quality Details
+        # تفاصيل الأهداف
+        # =================================================
+
+        with st.expander(
+            "🎯 تفاصيل Target Engine"
+        ):
+
+            target_cols = [
+
+                "السهم",
+
+                "سعر الدخول",
+
+                "الهدف الأول",
+                "نوع الهدف الأول",
+                "سبب الهدف الأول",
+                "ربح الهدف الأول %",
+                "R/R الهدف الأول",
+
+                "الهدف الثاني",
+                "نوع الهدف الثاني",
+                "سبب الهدف الثاني",
+                "ربح الهدف الثاني %",
+                "R/R الهدف الثاني",
+
+                "الهدف الثالث",
+                "نوع الهدف الثالث",
+                "سبب الهدف الثالث",
+                "ربح الهدف الثالث %",
+                "R/R الهدف الثالث",
+
+                "الهدف الرابع",
+                "نوع الهدف الرابع",
+                "سبب الهدف الرابع",
+                "ربح الهدف الرابع %",
+                "R/R الهدف الرابع",
+
+                "جودة الأهداف"
+            ]
+
+            available_target_cols = [
+                c for c in target_cols
+                if c in df_ok.columns
+            ]
+
+            st.dataframe(
+                df_ok[
+                    available_target_cols
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
+
+        # =================================================
+        # تفاصيل Entry
+        # =================================================
+
+        with st.expander(
+            "🎯 تفاصيل Entry Engine"
+        ):
+
+            entry_cols = [
+
+                "السهم",
+                "التقييم",
+                "الإشارة",
+                "الاتجاه",
+                "نوع الدخول",
+                "سبب الدخول",
+                "سعر الدخول",
+                "وقف الخسارة",
+                "جودة الأهداف",
+                "R/R الهدف الأول",
+                "مؤشر RSI",
+                "قوة الاتجاه ADX",
+                "التذبذب ATR %",
+                "EMA200"
+            ]
+
+            available_entry_cols = [
+                c for c in entry_cols
+                if c in df_ok.columns
+            ]
+
+            st.dataframe(
+                df_ok[
+                    available_entry_cols
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
+
+        # =================================================
+        # Data Quality Details
         # =================================================
 
         with st.expander(
@@ -3608,6 +4570,7 @@ if st.button(
                 stats_df
                 .rename(
                     columns={
+
                         "symbol":
                             "السهم",
 
@@ -3630,7 +4593,16 @@ if st.button(
                             "جودة Monthly %",
 
                         "data_quality":
-                            "جودة البيانات %"
+                            "جودة البيانات %",
+
+                        "daily_ema200":
+                            "Daily EMA200",
+
+                        "weekly_ema200":
+                            "Weekly EMA200",
+
+                        "monthly_ema200":
+                            "Monthly EMA200"
                     }
                 )
             )
@@ -3642,7 +4614,7 @@ if st.button(
             )
 
     # =====================================================
-    # ⚠️ الأسهم الفاشلة
+    # الأسهم الفاشلة
     # =====================================================
 
     df_failed = df_all[
@@ -3685,13 +4657,13 @@ if st.button(
         st.download_button(
             "⬇️ تحميل قائمة الأخطاء",
             csv_failed,
-            "EGX_AI_PRO_MAX_ERRORS_AR.csv",
+            "EGX_AI_PRO_MAX_V7_ERRORS_AR.csv",
             "text/csv",
             use_container_width=True
         )
 
     # =====================================================
-    # 🏁 الحالة النهائية
+    # الحالة النهائية
     # =====================================================
 
     st.success(
@@ -3713,5 +4685,11 @@ if st.button(
 📆 Weekly Coverage: {weekly_coverage:.1f}%
 
 🗓️ Monthly Coverage: {monthly_coverage:.1f}%
+
+📐 Daily EMA200 الحقيقي: {daily_ema200_coverage:.1f}%
+
+📐 Weekly EMA200 الحقيقي: {weekly_ema200_coverage:.1f}%
+
+📐 Monthly EMA200 الحقيقي: {monthly_ema200_coverage:.1f}%
 """
     )
