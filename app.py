@@ -26,7 +26,7 @@ st.caption(
 # =========================================================
 
 EGX100 = [
-    "COMI.CA", "MFPC.CA", "PHDC.CA", "ACRI.CA", "ORAS.CA",
+    "COMI.CA", "MFPC.CA", "PHDC.CA", "ACGC.CA", "ORAS.CA",
     "HRHO.CA", "TMGH.CA", "FWRY.CA", "SWDY.CA", "ETEL.CA",
     "AMOC.CA", "HELI.CA", "EAST.CA", "EFID.CA", "JUFO.CA",
     "ABUK.CA", "ESRS.CA", "EMFD.CA", "MNHD.CA", "CCAP.CA",
