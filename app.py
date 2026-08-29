@@ -30,8 +30,8 @@ EGX100 = [
     "HRHO.CA", "TMGH.CA", "FWRY.CA", "SWDY.CA", "ETEL.CA",
     "AMOC.CA", "HELI.CA", "EAST.CA", "EFID.CA", "JUFO.CA",
     "ABUK.CA", "ESRS.CA", "EMFD.CA", "MASR.CA", "CCAP.CA",
-    "CICH.CA", "OCDI.CA", "ORHD.CA", "MASR.CA", "TAQA.CA",
-    "ADIB.CA", "SAUD.CA", "QNBA.CA", "CIEB.CA", "FAIT.CA",
+    "CICH.CA", "OCDI.CA", "ORHD.CA", "TAQA.CA",
+    "ADIB.CA", "SAUD.CA", "QNBA.CA"  "CIEB.CA", "FAIT.CA",
     "CANA.CA", "EXPA.CA", "ARCC.CA", "AJWA.CA", "MICH.CA",
     "SUGR.CA", "POUL.CA", "DOMT.CA", "ISMA.CA", "UEGC.CA",
     "GBCO.CA", "OLFI.CA", "SKPC.CA", "AMER.CA", "TALM.CA",
@@ -41,10 +41,10 @@ EGX100 = [
     "IRON.CA", "ATQA.CA", "EGCH.CA", "KIMA.CA", "ALCN.CA",
     "MPCO.CA", "ELSH.CA", "MEPA.CA", "ODIN.CA", "EGAS.CA",
     "RACC.CA", "PRCL.CA", "BINV.CA", "EDBM.CA", "MCQE.CA",
-    "MOIL.CA", "NIPH.CA", "ISPH.CA", "DICE.CA", "IDHC.CA",
+    "MOIL.CA", "NIPH.CA", "ISPH.CA", "DSCW.CA",
     "UNIT.CA", "PHAR.CA", "TRTO.CA", "ALRA.CA", "FARE.CA",
-    "ICFC.CA", "MISr.CA", "MOBI.CA", "ELKA.CA", "NILE.CA",
-    "ATLC.CA", "COSG.CA", "MEDA.CA", "AMPI.CA", "COPR.CA"
+    "ICFC.CA", "MISR.CA", "MOBI.CA", "ELKA.CA", "NILE.CA",
+    "ATLC.CA", "COSG.CA", "MEDA.CA", "AMPI.CA", "COPR.CA",
 ]
 
 EGX100 = list(dict.fromkeys(EGX100))
