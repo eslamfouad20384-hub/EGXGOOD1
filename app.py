@@ -26,38 +26,25 @@ st.caption(
 # =========================================================
 
 EGX100 = [
-"COMI.CA", "MFPC.CA", "PHDC.CA", "ORAS.CA",
-"HRHO.CA", "TMGH.CA", "FWRY.CA", "SWDY.CA", "ETEL.CA",
-"AMOC.CA", "HELI.CA", "EAST.CA", "EFID.CA", "JUFO.CA",
-"ABUK.CA", "ESRS.CA", "EMFD.CA", "MASR.CA", "CCAP.CA",
-"CICH.CA", "OCDI.CA", "ORHD.CA",
-"ADIB.CA", "SAUD.CA", "CIEB.CA", "FAIT.CA",
-"CANA.CA", "EXPA.CA", "ARCC.CA", "AJWA.CA", "MICH.CA",
-"SUGR.CA", "POUL.CA", "DOMT.CA", "ISMA.CA", "UEGC.CA",
-"GBCO.CA", "OLFI.CA", "SKPC.CA", "AMER.CA", "TALM.CA",
-"ORWE.CA", "SPMD.CA", "ZMID.CA", "MENA.CA", "DAPH.CA",
-"RAYA.CA", "EGAL.CA", "ECAP.CA", "MPRC.CA",
-"NCCW.CA", "SCEM.CA", "ARAB.CA", "GDWA.CA", "ELEC.CA",
-"IRON.CA", "ATQA.CA", "EGCH.CA", "ALCN.CA",
-"MPCO.CA", "ELSH.CA", "MEPA.CA", "ODIN.CA", "EGAS.CA",
-"RACC.CA", "PRCL.CA", "BINV.CA", "EDBM.CA", "MCQE.CA",
-"MOIL.CA", "NIPH.CA", "ISPH.CA", "DSCW.CA",
-"UNIT.CA", "PHAR.CA", "TRTO.CA",
-"ICFC.CA", "ELKA.CA", "ATLC.CA", "COSG.CA", "AMPI.CA", "COPR.CA",
-
-"QNBE.CA", "HDBK.CA", "EFIH.CA", "BTFH.CA",
-"CLHO.CA", "VALU.CA", "MBSC.CA", "CIRA.CA",
-"MTIE.CA", "EGTS.CA", "EGSA.CA", "UBEE.CA",
-"MHOT.CA", "EGBE.CA", "IFAP.CA", "PRDC.CA",
-"MIPH.CA", "MPCI.CA", "MOIN.CA", "ISMQ.CA",
-"BONY.CA", "AXPH.CA", "PHTV.CA", "CPCI.CA",
-"NINH.CA", "SPIN.CA", "ENGC.CA", "ACAP.CA",
-"NAPR.CA", "CNFN.CA", "SVCE.CA", "KABO.CA",
-"OFH.CA", "GSSC.CA", "WCDF.CA", "MFSC.CA",
-"SAIB.CA", "ACGC.CA", "UEFM.CA", "KZPC.CA",
-"ADCI.CA", "INFI.CA", "ACTF.CA", "ASCM.CA",
-"ZEOT.CA", "GPIM.CA", "SMFR.CA", "ETRS.CA",
-"EDFM.CA", "MILS.CA"
+    "COMI.CA", "MFPC.CA", "PHDC.CA", "ACRI.CA", "ORAS.CA",
+    "HRHO.CA", "TMGH.CA", "FWRY.CA", "SWDY.CA", "ETEL.CA",
+    "AMOC.CA", "HELI.CA", "EAST.CA", "EFID.CA", "JUFO.CA",
+    "ABUK.CA", "ESRS.CA", "EMFD.CA", "MNHD.CA", "CCAP.CA",
+    "CICH.CA", "OCDI.CA", "ORHD.CA", "MASR.CA", "TAQA.CA",
+    "ADIB.CA", "SAUD.CA", "QNBA.CA", "CIEB.CA", "FAIT.CA",
+    "CANAL.CA", "EXPA.CA", "ARCC.CA", "AJWA.CA", "MICH.CA",
+    "SUGR.CA", "POUL.CA", "DOMT.CA", "ISMA.CA", "UEGC.CA",
+    "AUTO.CA", "OLFI.CA", "SKPC.CA", "AMER.CA", "TALM.CA",
+    "ORWE.CA", "SPMD.CA", "ZMID.CA", "MENA.CA", "DAPH.CA",
+    "RAYA.CA", "VERT.CA", "EGAL.CA", "ECAP.CA", "MPRC.CA",
+    "NCCW.CA", "SCEM.CA", "ARAB.CA", "GDWA.CA", "ELEC.CA",
+    "IRON.CA", "ATQA.CA", "EGCH.CA", "KIMA.CA", "ALCN.CA",
+    "MPCO.CA", "ELSH.CA", "MEPA.CA", "ODIN.CA", "EGAS.CA",
+    "RACC.CA", "PRCL.CA", "BINV.CA", "EDBM.CA", "MCQE.CA",
+    "MOIL.CA", "NIPH.CA", "ISPH.CA", "DICE.CA", "IDHC.CA",
+    "UNIT.CA", "PHAR.CA", "TRTO.CA", "ALRA.CA", "FARE.CA",
+    "ICFC.CA", "MISr.CA", "MOBI.CA", "ELKA.CA", "NILE.CA",
+    "ATLC.CA", "COSG.CA", "MEDA.CA", "AMPI.CA", "COPR.CA"
 ]
 
 EGX100 = list(dict.fromkeys(EGX100))
@@ -2171,6 +2158,2210 @@ def analyze(
     # Liquidity + Relative Strength
     # =====================================================
     liquidity_ratio = float(last_d.get("liquidity_ratio", np.nan))
-   
-   :if not np.isfinite(liquidity_ratio)
-    
+    if not np.isfinite(liquidity_ratio):
+        liquidity_ratio = 0.0
+    stock_return_20 = float(last_d.get("return_20d", np.nan))
+    market_return_20 = float(last_d.get("market_return_20", np.nan))
+    if not np.isfinite(stock_return_20):
+        stock_return_20 = 0.0
+    if not np.isfinite(market_return_20):
+        market_return_20 = 0.0
+    relative_strength = stock_return_20 - market_return_20
+    liquidity_score = 5 if liquidity_ratio >= 2 else 4 if liquidity_ratio >= 1.5 else 3 if liquidity_ratio >= 1.0 else 1 if liquidity_ratio >= 0.7 else 0
+    rs_score = 5 if relative_strength >= 0.10 else 4 if relative_strength >= 0.05 else 3 if relative_strength >= 0 else 1 if relative_strength >= -0.05 else 0
+
+    # =====================================================
+    # EMA200 Quality
+    # =====================================================
+
+    daily_ema200_complete = (
+        len(df_d) >= EMA200_REQUIRED_ROWS
+    )
+
+    weekly_ema200_complete = (
+        len(df_w) >= EMA200_REQUIRED_ROWS
+    )
+
+    monthly_ema200_complete = (
+        len(df_m) >= EMA200_REQUIRED_ROWS
+    )
+
+    ema200_status = (
+        "✅ مكتمل"
+        if (
+            daily_ema200_complete and
+            weekly_ema200_complete and
+            monthly_ema200_complete
+        )
+        else "⚠️ غير مكتمل"
+    )
+
+    # =====================================================
+    # Trend Alignment
+    # =====================================================
+
+    alignment = trend_alignment_score(
+        df_d,
+        df_w,
+        df_m
+    )
+
+    # =====================================================
+    # Market Regime
+    # =====================================================
+
+    regime = market_regime(
+        last_d
+    )
+
+    # =====================================================
+    # Entry Engine
+    # =====================================================
+
+    entry_info = determine_entry(
+        df_d,
+        alignment
+    )
+
+    entry = float(
+        entry_info["price"]
+    )
+
+    entry_type = entry_info["type"]
+    entry_reason = entry_info["reason"]
+
+    # =====================================================
+    # Risk / Target Engine
+    # =====================================================
+
+    risk = calculate_risk_engine(
+        df_d,
+        entry,
+        capital,
+        risk_percent,
+        df_w,
+        df_m
+    )
+
+    stop = risk["stop"]
+
+    tp1 = risk["tp1"]
+    tp2 = risk["tp2"]
+    tp3 = risk["tp3"]
+    tp4 = risk["tp4"]
+
+    # =====================================================
+    # Score جديد من 100
+    #
+    # 25 Trend
+    # 15 Momentum
+    # 15 Volume / Money Flow
+    # 10 Trend Strength
+    # 10 Price Structure
+    # 10 Entry Quality
+    # 10 Target Quality
+    # 5 Risk
+    #
+    # TOTAL = 100
+    # =====================================================
+
+    score = 0.0
+
+    # =====================================================
+    # 1. Trend Quality = 25
+    #
+    # لا نكرر EMA20/50/200 بشكل زائد
+    # =====================================================
+
+    trend_component = (
+        alignment * 0.25
+    )
+
+    score += trend_component
+
+    # =====================================================
+    # 2. Momentum = 15
+    # =====================================================
+
+    rsi = float(
+        last_d["rsi"]
+    )
+
+    momentum_score = 0
+
+    if 50 <= rsi <= 65:
+        momentum_score += 7
+
+    elif 45 <= rsi < 50:
+        momentum_score += 5
+
+    elif 65 < rsi <= 70:
+        momentum_score += 5
+
+    elif 35 <= rsi < 45:
+        momentum_score += 2
+
+    if (
+        last_d["macd"] >
+        last_d["macd_signal"]
+    ):
+        momentum_score += 5
+
+    elif last_d["macd_hist"] > 0:
+        momentum_score += 3
+
+    stoch_k = float(
+        last_d["stoch_rsi_k"]
+    )
+
+    stoch_d = float(
+        last_d["stoch_rsi_d"]
+    )
+
+    if stoch_k > stoch_d:
+        momentum_score += 3
+
+    score += min(
+        15,
+        momentum_score
+    )
+
+    # =====================================================
+    # 3. Volume / Money Flow = 10
+    # =====================================================
+
+    volume_ratio = float(
+        last_d["volume_ratio"]
+    )
+
+    money_score = 0
+
+    if volume_ratio >= 2:
+        money_score += 5
+
+    elif volume_ratio >= 1.5:
+        money_score += 4
+
+    elif volume_ratio >= 1.1:
+        money_score += 3
+
+    elif volume_ratio >= 0.8:
+        money_score += 1
+
+    mfi = float(
+        last_d["mfi"]
+    )
+
+    if 50 <= mfi <= 75:
+        money_score += 4
+
+    elif 40 <= mfi < 50:
+        money_score += 2
+
+    elif 75 < mfi <= 85:
+        money_score += 2
+
+    obv = float(
+        last_d["obv"]
+    )
+
+    obv_ma = float(
+        last_d["obv_ma"]
+    )
+
+    obv_slope = float(
+        last_d["obv_slope"]
+    )
+
+    if (
+        obv > obv_ma and
+        obv_slope > 0
+    ):
+        money_score += 6
+
+    elif (
+        obv > obv_ma or
+        obv_slope > 0
+    ):
+        money_score += 4
+
+    elif obv_slope > 0:
+        money_score += 2
+
+    score += min(
+        10,
+        money_score
+    )
+
+    # =====================================================
+    # 4. Trend Strength = 5
+    # =====================================================
+
+    adx_val = float(
+        last_d["adx"]
+    )
+
+    strength_score = 0
+
+    if adx_val >= 30:
+        strength_score = 5
+    elif adx_val >= 25:
+        strength_score = 4
+    elif adx_val >= 20:
+        strength_score = 3
+    elif adx_val >= 15:
+        strength_score = 1.5
+
+    # V9: cap ADX contribution at the declared 5 points.
+    score += min(5, strength_score)
+
+    # =====================================================
+    # 5. Price Structure = 10
+    # =====================================================
+
+    structure_score = 0
+
+    if (
+        last_d["ema20_slope"] > 0 and
+        last_d["ema50_slope"] > 0
+    ):
+        structure_score += 4
+
+    elif last_d["ema20_slope"] > 0:
+        structure_score += 2
+
+    if (
+        last_d["Close"] >
+        last_d["vwap"]
+    ):
+        structure_score += 3
+
+    if (
+        last_d["Close"] >
+        last_d["ema50"]
+    ):
+        structure_score += 3
+
+    score += min(
+        10,
+        structure_score
+    )
+
+    # =====================================================
+    # 6. Entry Quality = 10
+    # =====================================================
+
+    entry_score = 0
+
+    if entry_type == "دخول عند Pullback":
+        entry_score = 10
+
+    elif entry_type == "دخول اختراق":
+        entry_score = 9
+
+    elif entry_type == "دخول فوري":
+        entry_score = 7
+
+    else:
+        entry_score = 2
+
+    score += entry_score
+
+    # =====================================================
+    # 7. Target Quality = 10
+    # =====================================================
+
+    target_quality = float(
+        risk["target_quality"]
+    )
+
+    target_component = (
+        target_quality *
+        0.10
+    )
+
+    score += target_component
+
+    # =====================================================
+    # 8. Risk Quality = 5
+    # =====================================================
+
+    rr1 = float(
+        risk["rr1"]
+    )
+
+    risk_pct_actual = float(
+        risk["risk_pct"]
+    )
+
+    risk_score = 0
+
+    if np.isfinite(rr1) and rr1 >= 2:
+        risk_score += 3
+
+    elif rr1 >= 1.5:
+        risk_score += 2
+
+    elif rr1 >= 1.2:
+        risk_score += 1
+
+    if risk_pct_actual <= 5:
+        risk_score += 2
+
+    elif risk_pct_actual <= 8:
+        risk_score += 1
+
+    score += min(
+        5,
+        risk_score
+    )
+
+    # =====================================================
+    # EMA200 incomplete penalty
+    # =====================================================
+
+    incomplete_count = sum([
+        not daily_ema200_complete,
+        not weekly_ema200_complete,
+        not monthly_ema200_complete
+    ])
+
+    if incomplete_count >= 2:
+        score -= 4
+
+    elif incomplete_count == 1:
+        score -= 2
+
+    # =====================================================
+    # لا نعطي 85+ إذا كان Entry مجرد انتظار
+    # =====================================================
+
+    if entry_type == "انتظار تأكيد":
+
+        score = min(
+            score,
+            69
+        )
+
+    # =====================================================
+    # Final Score
+    # =====================================================
+
+    score = min(
+        100,
+        max(
+            0,
+            score
+        )
+    )
+
+    # =====================================================
+    # Confidence
+    # =====================================================
+
+    base_conf = ai_confidence(
+        last_d,
+        last_w,
+        last_m,
+        alignment,
+        data_quality
+    )
+
+    (
+        tp1_prob,
+        tp2_prob,
+        tp3_prob,
+        tp4_prob
+    ) = estimate_probabilities(
+        base_conf,
+        0 if not np.isfinite(risk["rr1"]) else risk["rr1"],
+        0 if not np.isfinite(risk["rr2"]) else risk["rr2"],
+        0 if not np.isfinite(risk["rr3"]) else risk["rr3"],
+        0 if not np.isfinite(risk["rr4"]) else risk["rr4"],
+        alignment,
+        adx_val
+    )
+
+    # =====================================================
+    # Signal
+    # =====================================================
+
+    if (
+        score >= 85 and
+        np.isfinite(rr1) and rr1 >= 1.5 and
+        alignment >= 65 and
+        entry_type != "انتظار تأكيد"
+    ):
+
+        signal = "🔥 قوي جداً"
+
+    elif (
+        score >= 70 and
+        np.isfinite(rr1) and rr1 >= 1.3 and
+        entry_type != "انتظار تأكيد"
+    ):
+
+        signal = "🟢 قوي"
+
+    elif score >= 55:
+
+        signal = "🟡 متوسط"
+
+    else:
+
+        signal = "⚠️ متابعة"
+
+    # =====================================================
+    # المدة المتوقعة
+    # =====================================================
+
+    volatility = (
+        float(last_d["atr"]) /
+        entry
+    )
+
+    if volatility > 0.07:
+        time_est = "1 - 3 أسابيع"
+
+    elif volatility > 0.04:
+        time_est = "3 - 8 أسابيع"
+
+    elif volatility > 0.02:
+        time_est = "1 - 3 شهور"
+
+    else:
+        time_est = "2 - 4 شهور"
+
+    # =====================================================
+    # النتيجة
+    # =====================================================
+
+    return {
+
+        "التقييم": round(
+            score,
+            2
+        ),
+
+        "الإشارة": signal,
+
+        "الاتجاه": regime,
+
+        "نوع الدخول": entry_type,
+
+        "سبب الدخول": entry_reason,
+
+        "سعر الدخول": round(
+            entry,
+            2
+        ),
+
+        "وقف الخسارة": round(
+            stop,
+            2
+        ),
+
+        "الهدف الأول": round(
+            tp1,
+            2
+        ),
+
+        "الهدف الثاني": round(
+            tp2,
+            2
+        ),
+
+        "الهدف الثالث": round(
+            tp3,
+            2
+        ),
+
+        "الهدف الرابع": round(
+            tp4,
+            2
+        ),
+
+        "سبب الهدف الأول": risk[
+            "tp1_reason"
+        ],
+
+        "سبب الهدف الثاني": risk[
+            "tp2_reason"
+        ],
+
+        "سبب الهدف الثالث": risk[
+            "tp3_reason"
+        ],
+
+        "سبب الهدف الرابع": risk[
+            "tp4_reason"
+        ],
+
+        "نوع الهدف الأول": risk[
+            "tp1_category"
+        ],
+
+        "نوع الهدف الثاني": risk[
+            "tp2_category"
+        ],
+
+        "نوع الهدف الثالث": risk[
+            "tp3_category"
+        ],
+
+        "نوع الهدف الرابع": risk[
+            "tp4_category"
+        ],
+
+        "ربح الهدف الأول %": round(
+            risk["tp1_profit_pct"],
+            2
+        ),
+
+        "ربح الهدف الثاني %": round(
+            risk["tp2_profit_pct"],
+            2
+        ),
+
+        "ربح الهدف الثالث %": round(
+            risk["tp3_profit_pct"],
+            2
+        ),
+
+        "ربح الهدف الرابع %": round(
+            risk["tp4_profit_pct"],
+            2
+        ),
+
+        "R/R الهدف الأول": round(
+            risk["rr1"],
+            2
+        ),
+
+        "R/R الهدف الثاني": round(
+            risk["rr2"],
+            2
+        ),
+
+        "R/R الهدف الثالث": round(
+            risk["rr3"],
+            2
+        ),
+
+        "R/R الهدف الرابع": round(
+            risk["rr4"],
+            2
+        ),
+
+        "ثقة الهدف الأول %": round(
+            tp1_prob * 100,
+            1
+        ),
+
+        "ثقة الهدف الثاني %": round(
+            tp2_prob * 100,
+            1
+        ),
+
+        "ثقة الهدف الثالث %": round(
+            tp3_prob * 100,
+            1
+        ),
+
+        "ثقة الهدف الرابع %": round(
+            tp4_prob * 100,
+            1
+        ),
+
+        "جودة الأهداف": round(
+            target_quality,
+            1
+        ),
+
+        "EMA200": ema200_status,
+
+        "التذبذب ATR %": round(
+            volatility * 100,
+            2
+        ),
+
+        "قوة الاتجاه ADX": round(
+            adx_val,
+            2
+        ),
+
+        "مؤشر RSI": round(
+            rsi,
+            2
+        ),
+
+        "المدة المتوقعة": time_est,
+        "السيولة Ratio": round(liquidity_ratio, 2),
+        "قوة السيولة": round(liquidity_score + rs_score, 2),
+        "Relative Strength %": round(relative_strength * 100, 2),
+        "عدد الأهداف الهيكلية": int(risk.get("structural_target_count", 0)),
+
+        # =================================================
+        # معلومات داخلية
+        # =================================================
+
+        "_entry_type": entry_type,
+
+        "_trend_alignment": round(
+            alignment,
+            2
+        ),
+
+        "_data_quality": round(
+            data_quality,
+            2
+        ),
+
+        "_ema200_daily": (
+            "مكتمل"
+            if daily_ema200_complete
+            else "غير مكتمل"
+        ),
+
+        "_ema200_weekly": (
+            "مكتمل"
+            if weekly_ema200_complete
+            else "غير مكتمل"
+        ),
+
+        "_ema200_monthly": (
+            "مكتمل"
+            if monthly_ema200_complete
+            else "غير مكتمل"
+        ),
+
+        "_risk_pct": round(
+            risk["risk_pct"],
+            2
+        ),
+
+        "_rr1": round(
+            risk["rr1"],
+            2
+        ),
+
+        "_rr2": round(
+            risk["rr2"],
+            2
+        ),
+
+        "_rr3": round(
+            risk["rr3"],
+            2
+        ),
+
+        "_rr4": round(
+            risk["rr4"],
+            2
+        ),
+
+        "_target_quality": round(
+            target_quality,
+            2
+        ),
+
+        "_position_size": round(
+            risk["position_size"],
+            2
+        ),
+
+        "_position_value": round(
+            risk["position_value"],
+            2
+        ),
+
+        "_obv": round(
+            obv,
+            2
+        ),
+
+        "_obv_ma": round(
+            obv_ma,
+            2
+        ),
+
+        "_stoch_rsi_k": round(
+            stoch_k,
+            4
+        ),
+
+        "_stoch_rsi_d": round(
+            stoch_d,
+            4
+        ),
+
+        "_vwap": round(
+            float(last_d["vwap"]),
+            4
+        ),
+
+        "_pullback_quality": round(
+            float(
+                last_d.get(
+                    "pullback_quality_score",
+                    0
+                )
+            ),
+            2
+        ),
+
+        "_volume_ratio": round(
+            volume_ratio,
+            2
+        ),
+        "_liquidity_ratio": round(liquidity_ratio, 2),
+        "_relative_strength": round(relative_strength * 100, 2),
+        "_structural_target_count": int(risk.get("structural_target_count", 0))
+    }
+
+
+# =========================================================
+# 🧪 V9 REALISTIC HISTORICAL BACKTEST / VALIDATION ENGINE
+# =========================================================
+def _bt_signal(row):
+    """Signal logic shared by the V9 backtest. Only signal-bar information."""
+    try:
+        close=float(row["Close"]); ema20=float(row["ema20"]); ema50=float(row["ema50"])
+        rsi=float(row["rsi"]); macd=float(row["macd"]); macd_signal=float(row["macd_signal"])
+        vol_ratio=float(row["volume_ratio"]); body_pct=float(row["body_pct"]); atr_pct=float(row["atr_pct"])
+    except Exception:
+        return False
+    if not all(np.isfinite(x) for x in [close,ema20,ema50,rsi,macd,macd_signal,vol_ratio,body_pct,atr_pct]):
+        return False
+    breakout=bool(row.get("breakout",False))
+    pullback=bool(row.get("pullback",False))
+    immediate=(close>ema20>ema50 and rsi>=50 and macd>macd_signal and vol_ratio>=1.0 and 0.015<=atr_pct<=0.12)
+    try: prev_res=float(row.get("previous_resistance",np.nan))
+    except Exception: prev_res=np.nan
+    breakout_fallback=np.isfinite(prev_res) and close>prev_res and vol_ratio>=1.30 and body_pct>=0.35 and close>ema20>ema50 and 0.015<=atr_pct<=0.12
+    pullback_fallback=(close>ema20>ema50 and (abs(close-ema20)/close<=0.03 or abs(close-ema50)/close<=0.05) and rsi>=45 and macd>=macd_signal)
+    return bool(breakout or pullback or immediate or breakout_fallback or pullback_fallback)
+
+
+def _bt_structural_targets(row, entry):
+    vals=[]
+    for col,name in [
+        ("previous_resistance","مقاومة يومية سابقة"),("resistance","مقاومة يومية"),
+        ("confirmed_swing_high","آخر Swing High مؤكد"),("fib_ext_1272","Fib 127.2%"),
+        ("fib_ext_1618","Fib 161.8%"),("fib_ext_2000","Fib 200%")]:
+        try:
+            x=float(row.get(col,np.nan))
+            if np.isfinite(x) and x>entry*1.001: vals.append((x,name))
+        except Exception: pass
+    vals=sorted(vals,key=lambda z:z[0])
+    out=[]
+    for x,name in vals:
+        if not out or abs(x-out[-1][0])/max(out[-1][0],1e-9)>=0.008:
+            out.append((x,name))
+        if len(out)>=4: break
+    return out
+
+
+def _simulate_bt_window(df, start_idx, end_idx, commission_pct=0.15, slippage_pct=0.10):
+    trades=[]; equity=1.0; peak=1.0; max_dd=0.0; next_allowed=start_idx
+    signals=entries=skipped_no_target=skipped_bad_stop=0
+    warmup=max(BACKTEST_WARMUP,220)
+    for i in range(max(start_idx,warmup), min(end_idx,len(df)-2)):
+        if i<next_allowed: continue
+        row=df.iloc[i]; signals+=1
+        try:
+            needed=["Open","High","Low","Close","ema20","ema50","rsi","macd","macd_signal","atr","volume_ratio","body_pct","atr_pct"]
+            if not all(np.isfinite(float(row.get(c,np.nan))) for c in needed): continue
+            atr_val=float(row["atr"]); close=float(row["Close"])
+            if atr_val<=0 or close<=0 or not _bt_signal(row): continue
+            raw_entry=float(df.iloc[i+1]["Open"])
+            if not np.isfinite(raw_entry) or raw_entry<=0: continue
+            # Buy-side execution cost: worse fill.
+            entry=raw_entry*(1+slippage_pct/100.0+commission_pct/100.0)
+            entries+=1
+            try: swing=float(row.get("confirmed_swing_low",np.nan))
+            except Exception: swing=np.nan
+            if np.isfinite(swing) and 0<swing<entry:
+                stop=max(swing-atr_val*0.20, entry-atr_val*1.50)
+            else: stop=entry-atr_val*1.50
+            if not np.isfinite(stop) or stop<=0 or stop>=entry:
+                skipped_bad_stop+=1; continue
+            targets=_bt_structural_targets(row,entry)
+            # V9 STRICT: no ATR target fallback. No structural target = no trade.
+            if not targets:
+                skipped_no_target+=1; continue
+            tprices=[x[0] for x in targets]
+            # Partial exits: 25% at each available target. Remainder exits on trailing stop / final close.
+            remaining=1.0; realized=0.0; tp_hits=0; exit_i=None
+            trail=stop
+            for j in range(i+1,min(end_idx,len(df))):
+                bar=df.iloc[j]
+                try: low=float(bar["Low"]); high=float(bar["High"]); close_j=float(bar["Close"])
+                except Exception: continue
+                # Conservative OHLC assumption: stop wins ties.
+                if low<=trail:
+                    exit_raw=trail*(1-slippage_pct/100.0-commission_pct/100.0)
+                    realized += remaining*((exit_raw-entry)/entry); remaining=0; exit_i=j; break
+                while tp_hits<len(tprices) and high>=tprices[tp_hits]:
+                    qty=min(0.25,remaining)
+                    exit_raw=tprices[tp_hits]*(1-slippage_pct/100.0-commission_pct/100.0)
+                    realized += qty*((exit_raw-entry)/entry)
+                    remaining-=qty; tp_hits+=1
+                    # Progressive trailing: break-even after TP1, then prior-bar low / ATR trail.
+                    if tp_hits==1: trail=max(trail,entry)
+                    else: trail=max(trail,float(bar["Low"]), close_j-atr_val*1.5)
+                if remaining<=1e-9:
+                    exit_i=j; break
+                # trailing update only after a confirmed target hit
+                if tp_hits>0:
+                    trail=max(trail,close_j-atr_val*1.5)
+            if remaining>1e-9:
+                j=min(end_idx-1,len(df)-1)
+                exit_raw=float(df.iloc[j]["Close"])*(1-slippage_pct/100.0-commission_pct/100.0)
+                realized += remaining*((exit_raw-entry)/entry); exit_i=j
+            ret=float(realized)
+            equity*=max(0.0001,1+ret); peak=max(peak,equity); max_dd=max(max_dd,(peak-equity)/peak)
+            trades.append({"return":ret,"tp_hits":tp_hits,"bars":int(exit_i-i),"entry":entry})
+            next_allowed=max(next_allowed,int(exit_i)+1)
+        except Exception:
+            continue
+    return trades,equity,max_dd,signals,entries,skipped_no_target,skipped_bad_stop
+
+
+def _summarize_bt(trades,equity,max_dd,signals,entries,skipped_no_target,skipped_bad_stop):
+    rets=np.array([t["return"] for t in trades],dtype=float) if trades else np.array([],dtype=float)
+    wins=rets[rets>0]; losses=rets[rets<0]
+    gross_win=float(wins.sum()) if len(wins) else 0.0; gross_loss=float(abs(losses.sum())) if len(losses) else 0.0
+    pf=(gross_win/gross_loss) if gross_loss>0 else (999.0 if gross_win>0 else 0.0)
+    expectancy=float(rets.mean()) if len(rets) else 0.0
+    std=float(rets.std(ddof=1)) if len(rets)>1 else 0.0
+    sharpe=(expectancy/std*np.sqrt(len(rets))) if std>0 else 0.0
+    downside=rets[rets<0]
+    downside_std=float(downside.std(ddof=1)) if len(downside)>1 else 0.0
+    sortino=(expectancy/downside_std*np.sqrt(len(rets))) if downside_std>0 else 0.0
+    cagr=equity**(252/max(1,sum(t["bars"] for t in trades)))-1 if equity>0 and trades else 0.0
+    calmar=(cagr/max_dd) if max_dd>0 else 0.0
+    return {"trades":len(trades),"closed_trades":len(trades),"open_trades":0,
+            "win_rate":(len(wins)/len(rets)*100 if len(rets) else 0.0),"profit_pct":(equity-1)*100,
+            "max_drawdown_pct":max_dd*100,"profit_factor":pf,"avg_trade_pct":expectancy*100,
+            "expectancy_pct":expectancy*100,"avg_win_pct":(wins.mean()*100 if len(wins) else 0),
+            "avg_loss_pct":(losses.mean()*100 if len(losses) else 0),"sharpe":sharpe,"sortino":sortino,
+            "calmar":calmar,"signals":signals,"entries":entries,"skipped_no_target":skipped_no_target,
+            "skipped_bad_stop":skipped_bad_stop,"tp1_hit_rate":(sum(t["tp_hits"]>=1 for t in trades)/len(trades)*100 if trades else 0),
+            "tp2_hit_rate":(sum(t["tp_hits"]>=2 for t in trades)/len(trades)*100 if trades else 0),
+            "tp3_hit_rate":(sum(t["tp_hits"]>=3 for t in trades)/len(trades)*100 if trades else 0),
+            "tp4_hit_rate":(sum(t["tp_hits"]>=4 for t in trades)/len(trades)*100 if trades else 0),
+            "bars_used":sum(t["bars"] for t in trades) if trades else 0}
+
+
+def run_real_backtest(df, max_bars=300, commission_pct=None, slippage_pct=None, monte_carlo_runs=500):
+    empty={"trades":0,"closed_trades":0,"open_trades":0,"win_rate":0.0,"profit_pct":0.0,"max_drawdown_pct":0.0,"profit_factor":0.0,"avg_trade_pct":0.0,"expectancy_pct":0.0,"avg_win_pct":0.0,"avg_loss_pct":0.0,"sharpe":0.0,"sortino":0.0,"calmar":0.0,"signals":0,"entries":0,"skipped_no_target":0,"skipped_bad_stop":0,"bars_used":0,"tp1_hit_rate":0.0,"tp2_hit_rate":0.0,"tp3_hit_rate":0.0,"tp4_hit_rate":0.0,"monte_carlo_5pct":0.0,"monte_carlo_median":0.0,"monte_carlo_95pct":0.0,"walk_forward_score":0.0,"oos_return_pct":0.0}
+    if df is None or df.empty: return empty
+    try: bt=add_indicators(df.copy())
+    except Exception: return empty
+    if bt.empty: return empty
+    comm=DEFAULT_COMMISSION_PCT if commission_pct is None else float(commission_pct)
+    slip=DEFAULT_SLIPPAGE_PCT if slippage_pct is None else float(slippage_pct)
+    warmup=max(BACKTEST_WARMUP,220); test_bars=max(50,int(max_bars)); start=max(warmup,len(bt)-test_bars-1); end=len(bt)-1
+    trades,equity,dd,signals,entries,snt,sbs=_simulate_bt_window(bt,start,end,comm,slip)
+    out=_summarize_bt(trades,equity,dd,signals,entries,snt,sbs); out["bars_used"]=max(0,end-start)
+    # Monte Carlo on trade returns: distribution of terminal equity.
+    if trades and monte_carlo_runs:
+        rng=np.random.default_rng(42); r=np.array([t["return"] for t in trades],float); sims=[]
+        for _ in range(int(monte_carlo_runs)):
+            sample=rng.choice(r,size=len(r),replace=True); sims.append(float(np.prod(np.maximum(0.0001,1+sample))-1)*100)
+        out["monte_carlo_5pct"]=float(np.percentile(sims,5)); out["monte_carlo_median"]=float(np.percentile(sims,50)); out["monte_carlo_95pct"]=float(np.percentile(sims,95))
+    # Walk-forward / OOS: three chronological test windows, fixed strategy (no future fitting).
+    n=len(bt); window=max(50,min(test_bars,n//5)); oos=[]
+    for k in range(3):
+        e=n-k*window; st_idx=max(warmup,e-window)
+        if e-st_idx<50: continue
+        tr,eq,dd2,sg,en,sn,sb=_simulate_bt_window(bt,st_idx,e,comm,slip)
+        if tr: oos.append((eq-1)*100)
+    if oos:
+        out["oos_return_pct"]=float(np.mean(oos)); out["walk_forward_score"]=float(sum(x>0 for x in oos)/len(oos)*100)
+    return out
+
+
+def estimate_historical_probabilities(bt):
+    return tuple(bt.get(k,0.0)/100.0 for k in ["tp1_hit_rate","tp2_hit_rate","tp3_hit_rate","tp4_hit_rate"])
+
+
+def _clip_score(value, low, high):
+    """تحويل قيمة رقمية إلى درجة 0-100 بشكل محافظ."""
+    try:
+        x = float(value)
+    except Exception:
+        return np.nan
+    if not np.isfinite(x):
+        return np.nan
+    if high <= low:
+        return 50.0
+    return float(np.clip((x - low) / (high - low) * 100.0, 0.0, 100.0))
+
+
+def calculate_trading_rank(row, backtest_enabled=True):
+    """ترتيب تداولي مستقل عن التقييم الفني، مع استخدام نتائج الباك تست عند توفرها."""
+    components = []
+
+    def add(value, weight):
+        if value is not None and np.isfinite(float(value)):
+            components.append((float(np.clip(value, 0, 100)), float(weight)))
+
+    # 35% جودة الإشارة الفنية الأساسية
+    add(row.get("التقييم", np.nan), 35.0)
+
+    if backtest_enabled:
+        trades = row.get("Backtest Trades", np.nan)
+        try:
+            trades = float(trades)
+        except Exception:
+            trades = np.nan
+
+        # نستخدم نتائج الباك تست فقط عندما يكون لها عدد صفقات معقول.
+        if np.isfinite(trades) and trades >= 10:
+            add(row.get("احتمال TP1 التاريخي %", np.nan), 15.0)
+            add(_clip_score(row.get("قيمة متوقعة %", np.nan), -2.0, 5.0), 15.0)
+            add(_clip_score(row.get("R/R الهدف الأول", np.nan), 0.8, 4.0), 10.0)
+            add(row.get("جودة الأهداف", np.nan), 5.0)
+            add(row.get("السيولة Ratio", np.nan) if np.isfinite(float(row.get("السيولة Ratio", np.nan))) else np.nan, 2.5)
+            add(row.get("Walk Forward Score %", np.nan), 5.0)
+            add(_clip_score(row.get("OOS Return %", np.nan), -20.0, 40.0), 5.0)
+            # عقوبة خفيفة للـ Drawdown المرتفع، بعد تحويله إلى جودة.
+            dd_quality = _clip_score(row.get("Backtest Max DD %", np.nan), 0.0, 30.0)
+            if np.isfinite(dd_quality):
+                add(100.0 - dd_quality, 2.5)
+        else:
+            # لو البيانات غير كافية، لا نعطيها وزنًا وهميًا.
+            add(row.get("جودة الأهداف", np.nan), 10.0)
+            add(_clip_score(row.get("R/R الهدف الأول", np.nan), 0.8, 4.0), 10.0)
+            add(row.get("السيولة Ratio", np.nan) if np.isfinite(float(row.get("السيولة Ratio", np.nan))) else np.nan, 5.0)
+    else:
+        add(row.get("جودة الأهداف", np.nan), 20.0)
+        add(_clip_score(row.get("R/R الهدف الأول", np.nan), 0.8, 4.0), 15.0)
+        add(row.get("السيولة Ratio", np.nan) if np.isfinite(float(row.get("السيولة Ratio", np.nan))) else np.nan, 15.0)
+
+    if not components:
+        return 0.0
+    return round(sum(v*w for v,w in components) / sum(w for _,w in components), 2)
+
+
+def apply_trading_ranking(df, backtest_enabled=True):
+    """إضافة الترتيب التداولي وفرز الأسهم من الأقوى للأضعف."""
+    out = df.copy()
+    if out.empty:
+        return out
+    out["الترتيب التداولي"] = out.apply(
+        lambda r: calculate_trading_rank(r, backtest_enabled), axis=1
+    )
+    out = out.sort_values(
+        ["الترتيب التداولي", "التقييم"],
+        ascending=[False, False]
+    ).reset_index(drop=True)
+    out["الترتيب"] = np.arange(1, len(out) + 1)
+    return out
+
+
+def build_market_return_proxy(data, symbols):
+    returns=[]
+    for symbol in symbols:
+        try:
+            d=extract_symbol_data(data,symbol)
+            if not d.empty and len(d)>=RS_LOOKBACK+1:
+                r=d["Close"].pct_change(RS_LOOKBACK).iloc[-1]
+                if np.isfinite(r): returns.append(float(r))
+        except Exception: pass
+    return float(np.median(returns)) if returns else 0.0
+
+
+# =========================================================
+# ⚡ معالجة سهم واحد
+# =========================================================
+
+def process(
+    symbol,
+    daily,
+    weekly,
+    monthly,
+    capital,
+    risk_percent,
+    market_return_20=0.0,
+    run_backtest=False,
+    backtest_bars=300
+):
+
+    clean_symbol = symbol.replace(
+        ".CA",
+        ""
+    )
+
+    try:
+
+        df_d = extract_symbol_data(
+            daily,
+            symbol
+        )
+
+        df_w = extract_symbol_data(
+            weekly,
+            symbol
+        )
+
+        df_m = extract_symbol_data(
+            monthly,
+            symbol
+        )
+
+        if df_d.empty:
+
+            return {
+                "السهم": clean_symbol,
+                "الحالة": "❌ لا توجد بيانات يومية"
+            }
+
+        if len(df_d) < MIN_DAILY_ROWS:
+
+            return {
+                "السهم": clean_symbol,
+                "الحالة": "❌ بيانات يومية غير كافية"
+            }
+
+        if df_w.empty:
+
+            return {
+                "السهم": clean_symbol,
+                "الحالة": "❌ لا توجد بيانات أسبوعية"
+            }
+
+        if len(df_w) < MIN_WEEKLY_ROWS:
+
+            return {
+                "السهم": clean_symbol,
+                "الحالة": "❌ بيانات أسبوعية غير كافية"
+            }
+
+        if df_m.empty:
+
+            return {
+                "السهم": clean_symbol,
+                "الحالة": "❌ لا توجد بيانات شهرية"
+            }
+
+        if len(df_m) < MIN_MONTHLY_ROWS:
+
+            return {
+                "السهم": clean_symbol,
+                "الحالة": "❌ بيانات شهرية غير كافية"
+            }
+
+        df_d["market_return_20"] = market_return_20
+        result = analyze(
+            df_d,
+            df_w,
+            df_m,
+            capital,
+            risk_percent
+        )
+        if run_backtest:
+            bt = run_real_backtest(df_d, backtest_bars, commission_pct, slippage_pct, monte_carlo_runs)
+            result["Backtest Trades"] = bt["trades"]
+            result["Backtest Win Rate %"] = round(bt["win_rate"], 1)
+            result["Backtest Return %"] = round(bt["profit_pct"], 2)
+            result["Backtest Max DD %"] = round(bt["max_drawdown_pct"], 2)
+            result["Backtest Profit Factor"] = round(bt["profit_factor"], 2)
+            result["Backtest Signals"] = int(bt.get("signals", 0))
+            result["Backtest Valid Entries"] = int(bt.get("entries", 0))
+            result["Backtest No Target"] = int(bt.get("skipped_no_target", 0))
+            result["Backtest Bad Stop"] = int(bt.get("skipped_bad_stop", 0))
+            result["Backtest Invalid Indicators"] = 0
+            result["Backtest Expectancy %"] = round(bt.get("expectancy_pct",0.0),3)
+            result["Backtest Avg Win %"] = round(bt.get("avg_win_pct",0.0),2)
+            result["Backtest Avg Loss %"] = round(bt.get("avg_loss_pct",0.0),2)
+            result["Backtest Sharpe"] = round(bt.get("sharpe",0.0),2)
+            result["Backtest Sortino"] = round(bt.get("sortino",0.0),2)
+            result["Backtest Calmar"] = round(bt.get("calmar",0.0),2)
+            result["Backtest TP1 Probability %"] = round(bt.get("tp1_hit_rate",0.0),1)
+            result["Backtest TP2 Probability %"] = round(bt.get("tp2_hit_rate",0.0),1)
+            result["Backtest TP3 Probability %"] = round(bt.get("tp3_hit_rate",0.0),1)
+            result["Backtest TP4 Probability %"] = round(bt.get("tp4_hit_rate",0.0),1)
+            result["Monte Carlo 5% Return %"] = round(bt.get("monte_carlo_5pct",0.0),2)
+            result["Monte Carlo Median Return %"] = round(bt.get("monte_carlo_median",0.0),2)
+            result["Monte Carlo 95% Return %"] = round(bt.get("monte_carlo_95pct",0.0),2)
+            result["Walk Forward Score %"] = round(bt.get("walk_forward_score",0.0),1)
+            result["OOS Return %"] = round(bt.get("oos_return_pct",0.0),2)
+            # V9: historical probabilities replace synthetic confidence for trading decisions.
+            result["احتمال TP1 التاريخي %"] = round(bt.get("tp1_hit_rate",0.0),1)
+            result["احتمال TP2 التاريخي %"] = round(bt.get("tp2_hit_rate",0.0),1)
+            result["احتمال TP3 التاريخي %"] = round(bt.get("tp3_hit_rate",0.0),1)
+            result["احتمال TP4 التاريخي %"] = round(bt.get("tp4_hit_rate",0.0),1)
+            result["قيمة متوقعة %"] = round(bt.get("expectancy_pct",0.0),3)
+            result["حالة التحقق"] = ("🟢 قوي" if bt.get("walk_forward_score",0)>=66 and bt.get("expectancy_pct",0)>0 and bt.get("profit_factor",0)>1.1 else "🟡 محايد" if bt.get("trades",0)>=10 else "⚪ بيانات غير كافية")
+        else:
+            result["Backtest Trades"] = 0
+            result["Backtest Win Rate %"] = np.nan
+            result["Backtest Return %"] = np.nan
+            result["Backtest Max DD %"] = np.nan
+            result["Backtest Profit Factor"] = np.nan
+            result["Backtest Signals"] = np.nan
+            result["Backtest Valid Entries"] = np.nan
+            result["Backtest No Target"] = np.nan
+            result["Backtest Bad Stop"] = np.nan
+            result["Backtest Invalid Indicators"] = np.nan
+            for _k in ["Backtest Expectancy %","Backtest Avg Win %","Backtest Avg Loss %","Backtest Sharpe","Backtest Sortino","Backtest Calmar","Backtest TP1 Probability %","Backtest TP2 Probability %","Backtest TP3 Probability %","Backtest TP4 Probability %","Monte Carlo 5% Return %","Monte Carlo Median Return %","Monte Carlo 95% Return %","Walk Forward Score %","OOS Return %","احتمال TP1 التاريخي %","احتمال TP2 التاريخي %","احتمال TP3 التاريخي %","احتمال TP4 التاريخي %","قيمة متوقعة %"]: result[_k]=np.nan
+            result["حالة التحقق"]="⚪ Backtest غير مفعل"
+
+        result["السهم"] = clean_symbol
+        result["الحالة"] = "✅ تم التحليل"
+
+        return result
+
+    except Exception as e:
+
+        return {
+            "السهم": clean_symbol,
+            "الحالة": f"❌ {str(e)[:120]}"
+        }
+
+
+# =========================================================
+# 🚀 تشغيل الفحص
+# =========================================================
+
+if st.button(
+    "🚀 بدء فحص الأسهم",
+    use_container_width=True
+):
+
+    st.info(
+        f"📡 جاري فحص {TOTAL_STOCKS} سهم..."
+    )
+
+    progress = st.progress(
+        0
+    )
+
+    status_text = st.empty()
+
+    # =====================================================
+    # Daily
+    # =====================================================
+
+    with st.spinner(
+        "📥 جاري تحميل البيانات اليومية..."
+    ):
+
+        daily = load_data(
+            EGX100,
+            period_daily,
+            "1d"
+        )
+
+    progress.progress(
+        20
+    )
+
+    # =====================================================
+    # Weekly
+    # =====================================================
+
+    status_text.info(
+        "📥 جاري تحميل البيانات الأسبوعية..."
+    )
+
+    weekly = load_data(
+        EGX100,
+        period_weekly,
+        "1wk"
+    )
+
+    progress.progress(
+        40
+    )
+
+    # =====================================================
+    # Monthly
+    # =====================================================
+
+    status_text.info(
+        "📥 جاري تحميل البيانات الشهرية..."
+    )
+
+    monthly = load_data(
+        EGX100,
+        period_monthly,
+        "1mo"
+    )
+
+    progress.progress(
+        50
+    )
+
+    # =====================================================
+    # Data Engine Stats
+    # =====================================================
+
+    status_text.info(
+        "🔍 جاري فحص جودة البيانات والتغطية..."
+    )
+
+    data_engine_stats = []
+
+    for symbol in EGX100:
+
+        df_d_check = extract_symbol_data(
+            daily,
+            symbol
+        )
+
+        df_w_check = extract_symbol_data(
+            weekly,
+            symbol
+        )
+
+        df_m_check = extract_symbol_data(
+            monthly,
+            symbol
+        )
+
+        qd = calculate_data_quality(
+            df_d_check
+        )
+
+        qw = calculate_data_quality(
+            df_w_check
+        )
+
+        qm = calculate_data_quality(
+            df_m_check
+        )
+
+        quality = (
+            qd["quality"] * 0.50 +
+            qw["quality"] * 0.30 +
+            qm["quality"] * 0.20
+        )
+
+        data_engine_stats.append({
+
+            "symbol": symbol,
+
+            "daily_rows":
+                qd["rows"],
+
+            "weekly_rows":
+                qw["rows"],
+
+            "monthly_rows":
+                qm["rows"],
+
+            "daily_quality":
+                qd["quality"],
+
+            "weekly_quality":
+                qw["quality"],
+
+            "monthly_quality":
+                qm["quality"],
+
+            "data_quality":
+                round(
+                    quality,
+                    2
+                ),
+
+            "daily_ema200":
+                (
+                    "✅"
+                    if qd["rows"] >= 200
+                    else "⚠️"
+                ),
+
+            "weekly_ema200":
+                (
+                    "✅"
+                    if qw["rows"] >= 200
+                    else "⚠️"
+                ),
+
+            "monthly_ema200":
+                (
+                    "✅"
+                    if qm["rows"] >= 200
+                    else "⚠️"
+                )
+        })
+
+    # =====================================================
+    # Relative Strength market proxy
+    # =====================================================
+    market_return_20 = build_market_return_proxy(daily, EGX100)
+
+    # =====================================================
+    # التحليل
+    # =====================================================
+
+    results = []
+
+    status_text.info(
+        f"🧠 جاري تحليل {TOTAL_STOCKS} سهم بالتوازي..."
+    )
+
+    with ThreadPoolExecutor(
+        max_workers=max_workers
+    ) as executor:
+
+        futures = {
+
+            executor.submit(
+                process,
+                symbol,
+                daily,
+                weekly,
+                monthly,
+                capital,
+                risk_percent,
+                market_return_20,
+                run_backtest,
+                backtest_bars
+            ): symbol
+
+            for symbol in EGX100
+        }
+
+        completed = 0
+
+        for future in as_completed(
+            futures
+        ):
+
+            try:
+
+                result = future.result()
+
+                if result:
+                    results.append(
+                        result
+                    )
+
+            except Exception as e:
+
+                symbol = futures[
+                    future
+                ]
+
+                results.append({
+
+                    "السهم":
+                        symbol.replace(
+                            ".CA",
+                            ""
+                        ),
+
+                    "الحالة":
+                        f"❌ {str(e)[:120]}"
+                })
+
+            completed += 1
+
+            progress.progress(
+                50 +
+                int(
+                    completed /
+                    TOTAL_STOCKS *
+                    50
+                )
+            )
+
+    progress.progress(
+        100
+    )
+
+    status_text.success(
+        "✅ انتهى الفحص بالكامل"
+    )
+
+    # =====================================================
+    # النتائج
+    # =====================================================
+
+    if not results:
+
+        st.error(
+            "❌ لم يتم الحصول على أي نتائج."
+        )
+
+        st.stop()
+
+    df_all = pd.DataFrame(
+        results
+    )
+
+    # =====================================================
+    # الأسهم الناجحة
+    # =====================================================
+
+    df_ok = df_all[
+        df_all["الحالة"] ==
+        "✅ تم التحليل"
+    ].copy()
+
+    if not df_ok.empty and "عدد الأهداف الهيكلية" in df_ok.columns:
+        no_targets = int((df_ok["عدد الأهداف الهيكلية"] < 1).sum())
+        if no_targets:
+            st.warning(f"⚠️ {no_targets} سهم بدون مستوى Target هيكلي موثوق؛ النظام لا يخترع أهداف ATR بديلة.")
+
+    # =====================================================
+    # التغطية
+    # =====================================================
+
+    total = TOTAL_STOCKS
+
+    analyzed = int(
+        (
+            df_all["الحالة"] ==
+            "✅ تم التحليل"
+        ).sum()
+    )
+
+    failed = total - analyzed
+
+    coverage = (
+        analyzed /
+        total *
+        100
+        if total > 0
+        else 0
+    )
+
+    # =====================================================
+    # Data Quality
+    # =====================================================
+
+    stats_df = pd.DataFrame(
+        data_engine_stats
+    )
+
+    if not stats_df.empty:
+
+        avg_quality = float(
+            stats_df[
+                "data_quality"
+            ].mean()
+        )
+
+        daily_coverage = float(
+            (
+                stats_df[
+                    "daily_rows"
+                ] >= MIN_DAILY_ROWS
+            ).mean() * 100
+        )
+
+        weekly_coverage = float(
+            (
+                stats_df[
+                    "weekly_rows"
+                ] >= MIN_WEEKLY_ROWS
+            ).mean() * 100
+        )
+
+        monthly_coverage = float(
+            (
+                stats_df[
+                    "monthly_rows"
+                ] >= MIN_MONTHLY_ROWS
+            ).mean() * 100
+        )
+
+        daily_ema200_coverage = float(
+            (
+                stats_df[
+                    "daily_rows"
+                ] >= 200
+            ).mean() * 100
+        )
+
+        weekly_ema200_coverage = float(
+            (
+                stats_df[
+                    "weekly_rows"
+                ] >= 200
+            ).mean() * 100
+        )
+
+        monthly_ema200_coverage = float(
+            (
+                stats_df[
+                    "monthly_rows"
+                ] >= 200
+            ).mean() * 100
+        )
+
+    else:
+
+        avg_quality = 0
+        daily_coverage = 0
+        weekly_coverage = 0
+        monthly_coverage = 0
+        daily_ema200_coverage = 0
+        weekly_ema200_coverage = 0
+        monthly_ema200_coverage = 0
+
+    # =====================================================
+    # ملخص الفحص
+    # =====================================================
+
+    st.subheader(
+        "📊 ملخص الفحص"
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric(
+        "📊 الأسهم المطلوبة",
+        total
+    )
+
+    c2.metric(
+        "✅ تم تحليلها",
+        analyzed
+    )
+
+    c3.metric(
+        "❌ فشل",
+        failed
+    )
+
+    c4.metric(
+        "📡 نسبة التغطية",
+        f"{coverage:.1f}%"
+    )
+
+    # =====================================================
+    # جودة البيانات
+    # =====================================================
+
+    st.subheader(
+        "📡 جودة البيانات"
+    )
+
+    q1, q2, q3, q4 = st.columns(4)
+
+    q1.metric(
+        "⭐ جودة البيانات",
+        f"{avg_quality:.1f}%"
+    )
+
+    q2.metric(
+        "📅 تغطية Daily",
+        f"{daily_coverage:.1f}%"
+    )
+
+    q3.metric(
+        "📆 تغطية Weekly",
+        f"{weekly_coverage:.1f}%"
+    )
+
+    q4.metric(
+        "🗓️ تغطية Monthly",
+        f"{monthly_coverage:.1f}%"
+    )
+
+    st.subheader(
+        "📐 تغطية EMA200 الحقيقي"
+    )
+
+    e1, e2, e3 = st.columns(3)
+
+    e1.metric(
+        "Daily EMA200",
+        f"{daily_ema200_coverage:.1f}%"
+    )
+
+    e2.metric(
+        "Weekly EMA200",
+        f"{weekly_ema200_coverage:.1f}%"
+    )
+
+    e3.metric(
+        "Monthly EMA200",
+        f"{monthly_ema200_coverage:.1f}%"
+    )
+
+    # =====================================================
+    # الأسهم الناجحة
+    # =====================================================
+
+    if not df_ok.empty:
+
+        # ترتيب تداولي: لا يعتمد على Score الفني وحده، بل يدمج جودة الإشارة
+        # مع نتائج الباك تست الواقعية عندما تكون متاحة.
+        df_ok = apply_trading_ranking(
+            df_ok,
+            backtest_enabled=run_backtest
+        )
+
+        # =================================================
+        # أفضل الأسهم
+        # =================================================
+
+        st.subheader(
+            f"🏆 أفضل {min(top_n, len(df_ok))} سهم"
+        )
+
+        top_df = df_ok.head(
+            top_n
+        ).copy()
+
+        preferred_cols = [
+
+            "الترتيب",
+            "السهم",
+            "الترتيب التداولي",
+            "التقييم",
+            "الإشارة",
+            "الاتجاه",
+            "نوع الدخول",
+            "سبب الدخول",
+            "سعر الدخول",
+            "وقف الخسارة",
+
+            "الهدف الأول",
+            "ربح الهدف الأول %",
+            "R/R الهدف الأول",
+            "سبب الهدف الأول",
+
+            "الهدف الثاني",
+            "ربح الهدف الثاني %",
+            "R/R الهدف الثاني",
+            "سبب الهدف الثاني",
+
+            "الهدف الثالث",
+            "ربح الهدف الثالث %",
+            "R/R الهدف الثالث",
+            "سبب الهدف الثالث",
+
+            "الهدف الرابع",
+            "ربح الهدف الرابع %",
+            "R/R الهدف الرابع",
+            "سبب الهدف الرابع",
+
+            "جودة الأهداف",
+            "EMA200",
+
+            "ثقة الهدف الأول %",
+            "ثقة الهدف الثاني %",
+            "ثقة الهدف الثالث %",
+            "ثقة الهدف الرابع %",
+
+            "مؤشر RSI",
+            "قوة الاتجاه ADX",
+            "التذبذب ATR %",
+            "السيولة Ratio",
+            "Relative Strength %",
+            "عدد الأهداف الهيكلية",
+            "Backtest Trades",
+            "Backtest Win Rate %",
+            "Backtest Return %",
+            "Backtest Max DD %",
+            "Backtest Profit Factor",
+            "Backtest Expectancy %",
+            "Backtest Avg Win %",
+            "Backtest Avg Loss %",
+            "Backtest Sharpe",
+            "Backtest Sortino",
+            "Backtest Calmar",
+            "احتمال TP1 التاريخي %",
+            "احتمال TP2 التاريخي %",
+            "احتمال TP3 التاريخي %",
+            "احتمال TP4 التاريخي %",
+            "Walk Forward Score %",
+            "OOS Return %",
+            "Monte Carlo 5% Return %",
+            "Monte Carlo Median Return %",
+            "Monte Carlo 95% Return %",
+            "حالة التحقق",
+            "المدة المتوقعة"
+        ]
+
+        existing_cols = [
+            c for c in preferred_cols
+            if c in top_df.columns
+        ]
+
+        top_df = top_df[
+            existing_cols
+        ]
+
+        top_display = top_df.rename(columns={
+            "Backtest Trades": "عدد صفقات الباك تست",
+            "Backtest Win Rate %": "نسبة الصفقات الرابحة %",
+            "Backtest Return %": "عائد الباك تست %",
+            "Backtest Max DD %": "أقصى تراجع في الباك تست %",
+            "Backtest Profit Factor": "معامل الربح Profit Factor",
+            "Backtest Expectancy %": "القيمة المتوقعة لكل صفقة %",
+            "Backtest Avg Win %": "متوسط الربح %",
+            "Backtest Avg Loss %": "متوسط الخسارة %",
+            "Backtest Sharpe": "Sharpe معامل شارب",
+            "Backtest Sortino": "Sortino معامل سورتينو",
+            "Backtest Calmar": "Calmar معامل كالمار",
+            "احتمال TP1 التاريخي %": "احتمال تحقيق الهدف الأول تاريخيًا %",
+            "احتمال TP2 التاريخي %": "احتمال تحقيق الهدف الثاني تاريخيًا %",
+            "احتمال TP3 التاريخي %": "احتمال تحقيق الهدف الثالث تاريخيًا %",
+            "احتمال TP4 التاريخي %": "احتمال تحقيق الهدف الرابع تاريخيًا %",
+            "Walk Forward Score %": "درجة Walk-Forward %",
+            "OOS Return %": "عائد الاختبار خارج العينة OOS %",
+            "Monte Carlo 5% Return %": "أدنى 5% Monte Carlo %",
+            "Monte Carlo Median Return %": "الوسيط Monte Carlo %",
+            "Monte Carlo 95% Return %": "أعلى 5% Monte Carlo %"
+        })
+        st.caption(
+            "📌 ترتيب الأسهم هنا هو الترتيب التداولي النهائي، وليس التقييم الفني فقط. "
+            "عند تفعيل الباك تست يدخل احتمال تحقق TP1 التاريخي والقيمة المتوقعة وR/R وجودة الأهداف وWalk-Forward وOOS ومخاطر التراجع ضمن الترتيب. "
+            "لو الباك تست غير كافٍ، النظام يقلل وزنه ولا يخترع نتائج تاريخية."
+        )
+
+        st.dataframe(
+            top_display,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        # =================================================
+        # الأسهم القوية
+        # =================================================
+
+        strong = df_ok[
+            df_ok["التقييم"] > 70
+        ].copy()
+
+        st.subheader(
+            f"🔥 الأسهم القوية: {len(strong)}"
+        )
+
+        if not strong.empty:
+
+            strong = strong[
+                existing_cols
+            ]
+
+            st.dataframe(
+                strong,
+                use_container_width=True,
+                hide_index=True
+            )
+
+        else:
+
+            st.warning(
+                "⚠️ لا توجد أسهم قوية حالياً حسب شروط النظام."
+            )
+
+        # =================================================
+        # جميع الأسهم
+        # =================================================
+
+        st.subheader(
+            "📋 جميع الأسهم التي تم تحليلها"
+        )
+
+        st.dataframe(
+            df_ok[
+                existing_cols
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+        # =================================================
+        # CSV
+        # =================================================
+
+        csv_ok = (
+            df_ok[
+                existing_cols
+            ]
+            .to_csv(
+                index=False
+            )
+            .encode(
+                "utf-8-sig"
+            )
+        )
+
+        st.download_button(
+            "⬇️ تحميل نتائج الأسهم المحللة",
+            csv_ok,
+            "EGX_AI_PRO_MAX_V8.2_RESULTS_AR.csv",
+            "text/csv",
+            use_container_width=True
+        )
+
+        # =================================================
+        # معلومات المحرك
+        # =================================================
+
+        with st.expander(
+            "🔬 معلومات المحرك المتقدمة"
+        ):
+
+            internal_cols = [
+
+                "السهم",
+
+                "_entry_type",
+                "_trend_alignment",
+                "_data_quality",
+
+                "_ema200_daily",
+                "_ema200_weekly",
+                "_ema200_monthly",
+
+                "_risk_pct",
+
+                "_rr1",
+                "_rr2",
+                "_rr3",
+                "_rr4",
+
+                "_target_quality",
+
+                "_position_size",
+                "_position_value",
+
+                "_pullback_quality",
+                "_volume_ratio",
+                "_liquidity_ratio",
+                "_relative_strength",
+                "_structural_target_count",
+
+                "_obv",
+                "_obv_ma",
+
+                "_stoch_rsi_k",
+                "_stoch_rsi_d",
+
+                "_vwap"
+            ]
+
+            available_internal = [
+                c for c in internal_cols
+                if c in df_ok.columns
+            ]
+
+            internal_df = (
+                df_ok[
+                    available_internal
+                ]
+                .rename(
+                    columns={
+
+                        "_entry_type":
+                            "نوع الدخول",
+
+                        "_trend_alignment":
+                            "Trend Alignment",
+
+                        "_data_quality":
+                            "جودة البيانات",
+
+                        "_ema200_daily":
+                            "Daily EMA200",
+
+                        "_ema200_weekly":
+                            "Weekly EMA200",
+
+                        "_ema200_monthly":
+                            "Monthly EMA200",
+
+                        "_risk_pct":
+                            "المخاطرة %",
+
+                        "_rr1":
+                            "R/R TP1",
+
+                        "_rr2":
+                            "R/R TP2",
+
+                        "_rr3":
+                            "R/R TP3",
+
+                        "_rr4":
+                            "R/R TP4",
+
+                        "_target_quality":
+                            "جودة الأهداف",
+
+                        "_position_size":
+                            "حجم المركز",
+
+                        "_position_value":
+                            "قيمة المركز",
+
+                        "_pullback_quality":
+                            "Pullback Quality",
+
+                        "_volume_ratio":
+                            "Volume Ratio",
+                        "_liquidity_ratio":
+                            "Liquidity Ratio",
+                        "_relative_strength":
+                            "Relative Strength %",
+                        "_structural_target_count":
+                            "عدد الأهداف الهيكلية",
+
+                        "_obv":
+                            "OBV",
+
+                        "_obv_ma":
+                            "OBV MA",
+
+                        "_stoch_rsi_k":
+                            "Stoch RSI K",
+
+                        "_stoch_rsi_d":
+                            "Stoch RSI D",
+
+                        "_vwap":
+                            "VWAP"
+                    }
+                )
+            )
+
+            st.dataframe(
+                internal_df,
+                use_container_width=True,
+                hide_index=True
+            )
+
+        # =================================================
+        # تفاصيل الأهداف
+        # =================================================
+
+        with st.expander(
+            "🎯 تفاصيل Target Engine"
+        ):
+
+            target_cols = [
+
+                "السهم",
+
+                "سعر الدخول",
+
+                "الهدف الأول",
+                "نوع الهدف الأول",
+                "سبب الهدف الأول",
+                "ربح الهدف الأول %",
+                "R/R الهدف الأول",
+
+                "الهدف الثاني",
+                "نوع الهدف الثاني",
+                "سبب الهدف الثاني",
+                "ربح الهدف الثاني %",
+                "R/R الهدف الثاني",
+
+                "الهدف الثالث",
+                "نوع الهدف الثالث",
+                "سبب الهدف الثالث",
+                "ربح الهدف الثالث %",
+                "R/R الهدف الثالث",
+
+                "الهدف الرابع",
+                "نوع الهدف الرابع",
+                "سبب الهدف الرابع",
+                "ربح الهدف الرابع %",
+                "R/R الهدف الرابع",
+
+                "جودة الأهداف"
+            ]
+
+            available_target_cols = [
+                c for c in target_cols
+                if c in df_ok.columns
+            ]
+
+            st.dataframe(
+                df_ok[
+                    available_target_cols
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
+
+        # =================================================
+        # تفاصيل Entry
+        # =================================================
+
+        with st.expander(
+            "🎯 تفاصيل Entry Engine"
+        ):
+
+            entry_cols = [
+
+                "السهم",
+                "التقييم",
+                "الإشارة",
+                "الاتجاه",
+                "نوع الدخول",
+                "سبب الدخول",
+                "سعر الدخول",
+                "وقف الخسارة",
+                "جودة الأهداف",
+                "R/R الهدف الأول",
+                "مؤشر RSI",
+                "قوة الاتجاه ADX",
+                "التذبذب ATR %",
+                "EMA200",
+                "احتمال TP1 التاريخي %",
+                "قيمة متوقعة %",
+                "حالة التحقق"
+            ]
+
+            available_entry_cols = [
+                c for c in entry_cols
+                if c in df_ok.columns
+            ]
+
+            st.dataframe(
+                df_ok[
+                    available_entry_cols
+                ],
+                use_container_width=True,
+                hide_index=True
+            )
+
+        # =================================================
+        # Data Quality Details
+        # =================================================
+
+        with st.expander(
+            "📡 تفاصيل جودة البيانات لكل سهم"
+        ):
+
+            quality_display = (
+                stats_df
+                .rename(
+                    columns={
+
+                        "symbol":
+                            "السهم",
+
+                        "daily_rows":
+                            "شموع Daily",
+
+                        "weekly_rows":
+                            "شموع Weekly",
+
+                        "monthly_rows":
+                            "شموع Monthly",
+
+                        "daily_quality":
+                            "جودة Daily %",
+
+                        "weekly_quality":
+                            "جودة Weekly %",
+
+                        "monthly_quality":
+                            "جودة Monthly %",
+
+                        "data_quality":
+                            "جودة البيانات %",
+
+                        "daily_ema200":
+                            "Daily EMA200",
+
+                        "weekly_ema200":
+                            "Weekly EMA200",
+
+                        "monthly_ema200":
+                            "Monthly EMA200"
+                    }
+                )
+            )
+
+            st.dataframe(
+                quality_display,
+                use_container_width=True,
+                hide_index=True
+            )
+
+    # =====================================================
+    # الأسهم الفاشلة
+    # =====================================================
+
+    df_failed = df_all[
+        df_all["الحالة"] !=
+        "✅ تم التحليل"
+    ].copy()
+
+    if not df_failed.empty:
+
+        st.subheader(
+            f"⚠️ الأسهم التي فشل تحميل/تحليل بياناتها: {len(df_failed)}"
+        )
+
+        st.dataframe(
+            df_failed[
+                [
+                    "السهم",
+                    "الحالة"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+        csv_failed = (
+            df_failed[
+                [
+                    "السهم",
+                    "الحالة"
+                ]
+            ]
+            .to_csv(
+                index=False
+            )
+            .encode(
+                "utf-8-sig"
+            )
+        )
+
+        st.download_button(
+            "⬇️ تحميل قائمة الأخطاء",
+            csv_failed,
+            "EGX_AI_PRO_MAX_V8_2_ERRORS_AR.csv",
+            "text/csv",
+            use_container_width=True
+        )
+
+    # =====================================================
+    # الحالة النهائية
+    # =====================================================
+
+    st.success(
+        f"""
+🔥 الفحص اكتمل بنجاح
+
+📊 إجمالي الأسهم: {total}
+
+✅ تم تحليل: {analyzed}
+
+❌ فشل: {failed}
+
+📡 نسبة تغطية البيانات: {coverage:.1f}%
+
+⭐ متوسط جودة البيانات: {avg_quality:.1f}%
+
+📅 Daily Coverage: {daily_coverage:.1f}%
+
+📆 Weekly Coverage: {weekly_coverage:.1f}%
+
+🗓️ Monthly Coverage: {monthly_coverage:.1f}%
+
+📐 Daily EMA200 الحقيقي: {daily_ema200_coverage:.1f}%
+
+📐 Weekly EMA200 الحقيقي: {weekly_ema200_coverage:.1f}%
+
+📐 Monthly EMA200 الحقيقي: {monthly_ema200_coverage:.1f}%
+"""
+    )
