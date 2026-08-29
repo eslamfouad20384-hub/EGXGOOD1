@@ -27,7 +27,7 @@ st.caption(
 
 EGX100 = [
     "COMI.CA", "MFPC.CA", "PHDC.CA", "ACRI.CA", "ORAS.CA", "QNBE.CA", "HDBK.CA", "EFIH.CA", "BTFH.CA",
-"CLHO.CA", "VALU.CA", "MBSC.CA", "CIRA.CA",
+"CLHO.CA", "VALU.CA", "MBSC.CA", "CIRA.CA", "EGCH.CA"
 "MTIE.CA", "EGTS.CA", "EGSA.CA", "UBEE.CA",
 "MHOT.CA", "EGBE.CA", "IFAP.CA", "PRDC.CA",
 "MIPH.CA", "MPCI.CA", "MOIN.CA", "ISMQ.CA",
@@ -44,18 +44,18 @@ EGX100 = [
     "ABUK.CA", "ESRS.CA", "EMFD.CA", "MNHD.CA", "CCAP.CA",
     "CICH.CA", "OCDI.CA", "ORHD.CA", "MASR.CA", "TAQA.CA",
     "ADIB.CA", "SAUD.CA", "QNBA.CA", "CIEB.CA", "FAIT.CA",
-    "CANAL.CA", "EXPA.CA", "ARCC.CA", "AJWA.CA", "MICH.CA",
+    "CANA.CA", "EXPA.CA", "ARCC.CA", "AJWA.CA", "MICH.CA",
     "SUGR.CA", "POUL.CA", "DOMT.CA", "ISMA.CA", "UEGC.CA",
     "AUTO.CA", "OLFI.CA", "SKPC.CA", "AMER.CA", "TALM.CA",
     "ORWE.CA", "SPMD.CA", "ZMID.CA", "MENA.CA", "DAPH.CA",
-    "RAYA.CA", "VERT.CA", "EGAL.CA", "ECAP.CA", "MPRC.CA",
+    "RAYA.CA", "EGAL.CA", "ECAP.CA", "MPRC.CA",
     "NCCW.CA", "SCEM.CA", "ARAB.CA", "GDWA.CA", "ELEC.CA",
-    "IRON.CA", "ATQA.CA", "EGCH.CA", "KIMA.CA", "ALCN.CA",
+    "IRON.CA", "ATQA.CA", "EGCH.CA", "ALCN.CA",
     "MPCO.CA", "ELSH.CA", "MEPA.CA", "ODIN.CA", "EGAS.CA",
     "RACC.CA", "PRCL.CA", "BINV.CA", "EDBM.CA", "MCQE.CA",
-    "MOIL.CA", "NIPH.CA", "ISPH.CA", "DICE.CA", "IDHC.CA",
+    "MOIL.CA", "NIPH.CA", "ISPH.CA", "VERT.CA", "DSCW.CA",
     "UNIT.CA", "PHAR.CA", "TRTO.CA", "ALRA.CA", "FARE.CA",
-    "ICFC.CA", "MISr.CA", "MOBI.CA", "ELKA.CA", "NILE.CA",
+    "ICFC.CA", "MOBI.CA", "ELKA.CA", "NCGC.CA",
     "ATLC.CA", "COSG.CA", "MEDA.CA", "AMPI.CA", "COPR.CA"
 ]
 
@@ -63,7 +63,7 @@ EGX100 = list(dict.fromkeys(EGX100))
 TOTAL_STOCKS = len(EGX100)
 
 # =========================================================
-# 🎛️ إعدادات الفحص
+# 🎛️ إعداداتl الفحص
 # =========================================================
 
 st.sidebar.header("⚙️ إعدادات الفحص")
