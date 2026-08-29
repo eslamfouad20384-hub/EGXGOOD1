@@ -26,14 +26,14 @@ st.caption(
 # =========================================================
 
 EGX100 = [
-    "COMI.CA", "MFPC.CA", "PHDC.CA", "ACRI.CA", "ORAS.CA", "HDBK.CA", 
+    "COMI.CA", "MFPC.CA", "PHDC.CA", "ORAS.CA", "HDBK.CA", 
     "EFIH.CA", 
     "BTFH.CA",
     "CLHO.CA", "MBSC.CA",  
     "MTIE.CA", "EGTS.CA", "EGSA.CA", 
     "MHOT.CA", "EGBE.CA", "IFAP.CA", "PRDC.CA",
     "MIPH.CA", "MPCI.CA", "MOIN.CA", "ISMQ.CA",
-    "BONY.CA", "AXPH.CA", "PHTV.CA", "CPCI.CA",
+    "AXPH.CA", "PHTV.CA", "CPCI.CA",
     "NINH.CA", "SPIN.CA", "ENGC.CA",
     "CNFN.CA", "SVCE.CA", "KABO.CA",
     "OFH.CA",  "GSSC.CA", "WCDF.CA", "MFSC.CA",
