@@ -26,7 +26,7 @@ st.caption(
 # =========================================================
 
 EGX100 = [
-    "COMI.CA", "MFPC.CA", "PHDC.CA", "ACRI.CA", "ORAS.CA", "QNBE.CA", "HDBK.CA", 
+    "COMI.CA", "MFPC.CA", "PHDC.CA", "ACRI.CA", "ORAS.CA", "HDBK.CA", 
     "EFIH.CA", 
     "BTFH.CA",
     "CLHO.CA", "VALU.CA", "MBSC.CA", "CIRA.CA",  
@@ -43,8 +43,8 @@ EGX100 = [
     "EDFM.CA", "MILS.CA"  "GBCO.CA",
     "HRHO.CA", "TMGH.CA", "FWRY.CA", "SWDY.CA", "ETEL.CA",
     "AMOC.CA", "HELI.CA", "EAST.CA", "EFID.CA", "JUFO.CA",
-    "ABUK.CA", "ESRS.CA", "EMFD.CA", "MNHD.CA", "CCAP.CA",
-    "CICH.CA", "OCDI.CA", "ORHD.CA", "MASR.CA", "TAQA.CA",
+    "ABUK.CA", "ESRS.CA", "EMFD.CA", "CCAP.CA",
+    "CICH.CA", "OCDI.CA", "ORHD.CA", "MASR.CA", 
     "ADIB.CA", "SAUD.CA", "QNBA.CA", "CIEB.CA", "FAIT.CA",
     "CANA.CA", "EXPA.CA", "ARCC.CA", "AJWA.CA", "MICH.CA",
     "SUGR.CA", "POUL.CA", "DOMT.CA", "ISMA.CA", "UEGC.CA",
@@ -55,10 +55,10 @@ EGX100 = [
     "IRON.CA", "ATQA.CA", "EGCH.CA", "ALCN.CA",
     "MPCO.CA", "ELSH.CA", "MEPA.CA", "ODIN.CA", "EGAS.CA",
     "RACC.CA", "PRCL.CA", "BINV.CA", "EDBM.CA", "MCQE.CA",
-    "MOIL.CA", "NIPH.CA", "ISPH.CA", "VERT.CA", "DSCW.CA",
+    "MOIL.CA", "NIPH.CA", "ISPH.CA", "DSCW.CA",
     "UNIT.CA", "PHAR.CA", "TRTO.CA", "ALRA.CA", "FARE.CA",
     "ICFC.CA", "MOBI.CA", "ELKA.CA", "NCGC.CA",
-    "ATLC.CA", "COSG.CA", "MEDA.CA", "AMPI.CA", "COPR.CA",
+    "ATLC.CA", "COSG.CA", "AMPI.CA", "COPR.CA",
 ]
 
 EGX100 = list(dict.fromkeys(EGX100))
