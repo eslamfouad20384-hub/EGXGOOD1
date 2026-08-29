@@ -26,7 +26,7 @@ st.caption(
 # =========================================================
 
 EGX100 = [
- """COMI.CA", "MFPC.CA", "PHDC.CA", "ORAS.CA",
+"COMI.CA", "MFPC.CA", "PHDC.CA", "ORAS.CA",
 "HRHO.CA", "TMGH.CA", "FWRY.CA", "SWDY.CA", "ETEL.CA",
 "AMOC.CA", "HELI.CA", "EAST.CA", "EFID.CA", "JUFO.CA",
 "ABUK.CA", "ESRS.CA", "EMFD.CA", "MASR.CA", "CCAP.CA",
@@ -58,7 +58,6 @@ EGX100 = [
 "ADCI.CA", "INFI.CA", "ACTF.CA", "ASCM.CA",
 "ZEOT.CA", "GPIM.CA", "SMFR.CA", "ETRS.CA",
 "EDFM.CA", "MILS.CA"
-",
 ]
 
 EGX100 = list(dict.fromkeys(EGX100))
