@@ -26,24 +26,24 @@ st.caption(
 # =========================================================
 
 EGX100 = [
-    "COMI.CA", "MFPC.CA", "PHDC.CA", "ACGC.CA", "ORAS.CA",
+    "COMI.CA", "MFPC.CA", "PHDC.CA", "ORAS.CA",
     "HRHO.CA", "TMGH.CA", "FWRY.CA", "SWDY.CA", "ETEL.CA",
     "AMOC.CA", "HELI.CA", "EAST.CA", "EFID.CA", "JUFO.CA",
     "ABUK.CA", "ESRS.CA", "EMFD.CA", "MASR.CA", "CCAP.CA",
     "CICH.CA", "OCDI.CA", "ORHD.CA", "TAQA.CA",
-    "ADIB.CA", "SAUD.CA", "QNB.CA", "CIEB.CA", "FAIT.CA",
+    "ADIB.CA", "SAUD.CA", "CIEB.CA", "FAIT.CA",
     "CANA.CA", "EXPA.CA", "ARCC.CA", "AJWA.CA", "MICH.CA",
     "SUGR.CA", "POUL.CA", "DOMT.CA", "ISMA.CA", "UEGC.CA",
     "GBCO.CA", "OLFI.CA", "SKPC.CA", "AMER.CA", "TALM.CA",
     "ORWE.CA", "SPMD.CA", "ZMID.CA", "MENA.CA", "DAPH.CA",
-    "RAYA.CA", "VERT.CA", "EGAL.CA", "ECAP.CA", "MPRC.CA",
+    "RAYA.CA", "EGAL.CA", "ECAP.CA", "MPRC.CA",
     "NCCW.CA", "SCEM.CA", "ARAB.CA", "GDWA.CA", "ELEC.CA",
     "IRON.CA", "ATQA.CA", "EGCH.CA", "EGCH.CA", "ALCN.CA",
     "MPCO.CA", "ELSH.CA", "MEPA.CA", "ODIN.CA", "EGAS.CA",
     "RACC.CA", "PRCL.CA", "BINV.CA", "EDBM.CA", "MCQE.CA",
     "MOIL.CA", "NIPH.CA", "ISPH.CA", "DSCW.CA",
-    "UNIT.CA", "PHAR.CA", "TRTO.CA", "ALRA.CA", "FARE.CA",
-    "ICFC.CA", "MISR.CA", "MOBI.CA", "ELKA.CA", "NCGC.CA ",
+    "UNIT.CA", "PHAR.CA", "TRTO.CA",
+    "ICFC.CA", "MOBI.CA", "ELKA.CA", "NCGC.CA ",
     "ATLC.CA", "COSG.CA", "MEDA.CA", "AMPI.CA", "COPR.CA",
 ]
 
