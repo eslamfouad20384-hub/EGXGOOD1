@@ -2171,4 +2171,4 @@ def analyze(
     # Liquidity + Relative Strength
     # =====================================================
     liquidity_ratio = float(last_d.get("liquidity_ratio", np.nan))
-  :if not np.isfinite(liquidity_ratio)
+    :if not np.isfinite(liquidity_ratio)
