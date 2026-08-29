@@ -26,19 +26,21 @@ st.caption(
 # =========================================================
 
 EGX100 = [
-    "COMI.CA", "MFPC.CA", "PHDC.CA", "ACRI.CA", "ORAS.CA", "QNBE.CA", "HDBK.CA", "EFIH.CA", "BTFH.CA",
-"CLHO.CA", "VALU.CA", "MBSC.CA", "CIRA.CA", "EGCH.CA"
-"MTIE.CA", "EGTS.CA", "EGSA.CA", "UBEE.CA",
-"MHOT.CA", "EGBE.CA", "IFAP.CA", "PRDC.CA",
-"MIPH.CA", "MPCI.CA", "MOIN.CA", "ISMQ.CA",
-"BONY.CA", "AXPH.CA", "PHTV.CA", "CPCI.CA",
-"NINH.CA", "SPIN.CA", "ENGC.CA", "ACAP.CA",
-"NAPR.CA", "CNFN.CA", "SVCE.CA", "KABO.CA",
-"OFH.CA", "GSSC.CA", "WCDF.CA", "MFSC.CA",
-"SAIB.CA", "ACGC.CA", "UEFM.CA", "KZPC.CA",
-"ADCI.CA", "INFI.CA", "ACTF.CA", "ASCM.CA",
-"ZEOT.CA", "GPIM.CA", "SMFR.CA", "ETRS.CA",
-"EDFM.CA", "MILS.CA"
+    "COMI.CA", "MFPC.CA", "PHDC.CA", "ACRI.CA", "ORAS.CA", "QNBE.CA", "HDBK.CA", 
+    "EFIH.CA", 
+    "BTFH.CA",
+    "CLHO.CA", "VALU.CA", "MBSC.CA", "CIRA.CA",  
+    "MTIE.CA", "EGTS.CA", "EGSA.CA", "UBEE.CA",
+    "MHOT.CA", "EGBE.CA", "IFAP.CA", "PRDC.CA",
+    "MIPH.CA", "MPCI.CA", "MOIN.CA", "ISMQ.CA",
+    "BONY.CA", "AXPH.CA", "PHTV.CA", "CPCI.CA",
+    "NINH.CA", "SPIN.CA", "ENGC.CA", "ACAP.CA",
+    "NAPR.CA", "CNFN.CA", "SVCE.CA", "KABO.CA",
+    "OFH.CA",  "GSSC.CA", "WCDF.CA", "MFSC.CA",
+    "SAIB.CA", "ACGC.CA", "UEFM.CA", "KZPC.CA",
+    "ADCI.CA", "INFI.CA", "ACTF.CA", "ASCM.CA",
+    "ZEOT.CA", "GPIM.CA", "SMFR.CA", "ETRS.CA",
+    "EDFM.CA", "MILS.CA"  "GBCO.CA",
     "HRHO.CA", "TMGH.CA", "FWRY.CA", "SWDY.CA", "ETEL.CA",
     "AMOC.CA", "HELI.CA", "EAST.CA", "EFID.CA", "JUFO.CA",
     "ABUK.CA", "ESRS.CA", "EMFD.CA", "MNHD.CA", "CCAP.CA",
@@ -46,7 +48,7 @@ EGX100 = [
     "ADIB.CA", "SAUD.CA", "QNBA.CA", "CIEB.CA", "FAIT.CA",
     "CANA.CA", "EXPA.CA", "ARCC.CA", "AJWA.CA", "MICH.CA",
     "SUGR.CA", "POUL.CA", "DOMT.CA", "ISMA.CA", "UEGC.CA",
-    "AUTO.CA", "OLFI.CA", "SKPC.CA", "AMER.CA", "TALM.CA",
+    "OLFI.CA", "SKPC.CA", "AMER.CA", "TALM.CA",
     "ORWE.CA", "SPMD.CA", "ZMID.CA", "MENA.CA", "DAPH.CA",
     "RAYA.CA", "EGAL.CA", "ECAP.CA", "MPRC.CA",
     "NCCW.CA", "SCEM.CA", "ARAB.CA", "GDWA.CA", "ELEC.CA",
@@ -56,7 +58,7 @@ EGX100 = [
     "MOIL.CA", "NIPH.CA", "ISPH.CA", "VERT.CA", "DSCW.CA",
     "UNIT.CA", "PHAR.CA", "TRTO.CA", "ALRA.CA", "FARE.CA",
     "ICFC.CA", "MOBI.CA", "ELKA.CA", "NCGC.CA",
-    "ATLC.CA", "COSG.CA", "MEDA.CA", "AMPI.CA", "COPR.CA"
+    "ATLC.CA", "COSG.CA", "MEDA.CA", "AMPI.CA", "COPR.CA",
 ]
 
 EGX100 = list(dict.fromkeys(EGX100))
