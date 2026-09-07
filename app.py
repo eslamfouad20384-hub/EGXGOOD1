@@ -27,7 +27,7 @@ st.caption(
 
 EGX100 = [
     "COMI.CA", "MFPC.CA", "PHDC.CA", "ORAS.CA", "HDBK.CA", 
-    "EFIH.CA", "AMES.CA", "AIHC.CA",
+    "EFIH.CA", "AMES.CA", "AIH.CA",
     "BTFH.CA", "BIOC.CA",
     "CLHO.CA", "MBSC.CA",  
     "MTIE.CA", "EGTS.CA", "EGSA.CA", 
